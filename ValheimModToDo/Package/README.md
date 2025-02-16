@@ -30,6 +30,7 @@ Completing crafting or building an recipe item on the list will also automatical
 
 | Version | Notes           |
 | ------- | --------------- |
+| 0.1.1   | Now updates To-Do List also when moving items to/from inventory |
 | 0.1.0   | Initial release |
 
 
@@ -37,7 +38,6 @@ Completing crafting or building an recipe item on the list will also automatical
 
 Reasons not to use this mod:
 
- - Moving items to/from you inventory and container does not automatically update the to-do list
  - Moving the to-do list panel or clicking the **Clear All** button is only available when inventory is open
  - Player inventory and the to-do list panel go on top of each other unless player moves the panel
  - Restarting the game will clear the to-do list

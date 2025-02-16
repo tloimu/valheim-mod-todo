@@ -21,6 +21,20 @@ namespace ValheimModToDo.Patches
         }
     }
 
+    [HarmonyPatch(typeof(Inventory), nameof(Inventory.Changed))]
+    public static class Inventory_Changed_Patch
+    {
+        public static void Postfix(Inventory __instance)
+        {
+            Jotunn.Logger.LogInfo("Inventory.Changed()");
+            if (Player.m_localPlayer != null)
+            {
+                if (Player.m_localPlayer.m_inventory == __instance)
+                    ValheimModToDo.OnInventoryChanged();
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.DoCrafting))]
     public static class InventoryGui_DoCrafting_Patch
     {

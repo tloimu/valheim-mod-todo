@@ -2,9 +2,6 @@
 
 # To-Do
 
- - Project to Git
- - Project to Thunderstore (https://thunderstore.io)
- - Update To-Do view when moving things to/from player inventory from/to a container
  - Add free text notes
  - With Shift+Home -> Open to-do view in block input mode:
 	+ show and allow pressing Clear All, Edit Notes, Remove Eecipe etc.
