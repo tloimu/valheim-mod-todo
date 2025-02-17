@@ -15,9 +15,7 @@ namespace ValheimModToDo.Patches
     {
         public static void Postfix(InventoryGui __instance)
         {
-            Jotunn.Logger.LogDebug("Inventory Awake");
             ToDoCraftController.CreateAddCraftToDoButton(ValheimModToDo.OnClickAddCraftItemButton);
-            Jotunn.Logger.LogDebug("Inventory Awake done");
         }
     }
 
@@ -26,7 +24,7 @@ namespace ValheimModToDo.Patches
     {
         public static void Postfix(Inventory __instance)
         {
-            Jotunn.Logger.LogInfo("Inventory.Changed()");
+            Jotunn.Logger.LogInfo($"Inventory.Changed: name {__instance.m_name}");
             if (Player.m_localPlayer != null)
             {
                 if (Player.m_localPlayer.m_inventory == __instance)
@@ -56,29 +54,7 @@ namespace ValheimModToDo.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Character), nameof(Character.ShowPickupMessage))]
-    public static class Character_ShowPickupMessage_Patch
-    {
-        public static void Postfix(Character __instance, ItemDrop.ItemData item, int amount)
-        {
-            Jotunn.Logger.LogInfo($"Character.ShowPickupMessage: {item.m_shared.m_name} is player {__instance.IsPlayer()}");
-            if (__instance.IsPlayer())
-                ValheimModToDo.OnInventoryChanged();
-        }
-    }
-
-    [HarmonyPatch(typeof(Character), nameof(Character.ShowRemovedMessage))]
-    public static class Character_ShowRemoveMessage_Patch
-    {
-        public static void Postfix(Character __instance, ItemDrop.ItemData item, int amount)
-        {
-            Jotunn.Logger.LogInfo($"Character.ShowRemovedMessage: {item.m_shared.m_name} is player {__instance.IsPlayer()}");
-            if (__instance.IsPlayer())
-                ValheimModToDo.OnInventoryChanged();
-        }
-    }
-
-    [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.DropItem))]
+/*    [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.DropItem))]
     public static class Humanoid_DropItem_Patch
     {
         public static void Postfix(Humanoid __instance, Inventory inventory, ItemDrop.ItemData item, int amount)
@@ -87,7 +63,7 @@ namespace ValheimModToDo.Patches
             if (__instance.IsPlayer())
                 ValheimModToDo.OnInventoryChanged();
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
     public static class Player_PlacePiece_Patch

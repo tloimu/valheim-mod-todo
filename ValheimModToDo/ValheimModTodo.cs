@@ -158,12 +158,6 @@ namespace ValheimModToDo
             var inventory = Player.m_localPlayer.GetInventory();
             todoPanel.UpdateResources(todoResources, inventory);
 
-            Jotunn.Logger.LogInfo("Player Inventory:");
-            foreach (var item in inventory.m_inventory)
-            {
-                Jotunn.Logger.LogInfo($"  {item.m_shared.m_name} stack {item.m_stack} quality {item.m_quality}");
-            }
-
             if (InventoryGui.instance != null && InventoryGui.instance.IsContainerOpen())
             {
                 var container = InventoryGui.instance.m_currentContainer;

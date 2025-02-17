@@ -371,8 +371,9 @@ libraries/*
 # not the valheim path file
 Environment.props
 
-# Not the compiled plugin
+# Not the compiled plugin or released zips
 ValheimModToDo/Package/plugins
+*.zip
 
 # Not the Jotunn Unity Editor Assets
 JotunnModUnity
