@@ -21,24 +21,19 @@ The needed amount of resources is automatically updated when you:
 
  - pick an item to your inventory
  - drop an item from your inventory
+ - move an item between your inventory and a container
  - complete crafting or building an recipe item on the list
 
 Completing crafting or building an recipe item on the list will also automatically remove it from the list.
 
-
-## Changelog
-
-| Version | Notes           |
-| ------- | --------------- |
-| 0.1.0   | Initial release |
+The To-Do List is stored in a file `todo-list-for-{PlayerName}-in-map-v1.xml` in Valheim's data folder.
 
 
 ## Known issues
 
 Reasons not to use this mod:
 
- - Moving items to/from you inventory and container does not automatically update the to-do list
+ - Does not handle equipment upgrades (item quality) costs correctly
  - Moving the to-do list panel or clicking the **Clear All** button is only available when inventory is open
  - Player inventory and the to-do list panel go on top of each other unless player moves the panel
- - Restarting the game will clear the to-do list
  - No translations

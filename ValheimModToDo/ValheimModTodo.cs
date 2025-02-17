@@ -136,6 +136,7 @@ namespace ValheimModToDo
             // Create the panel if it does not exist
             if (!ToDoPanel)
             {
+                todoResources.LoadFromFile();
                 ToDoPanel = todoPanel.CreatePanel(OnClearAllCraftingRecipes);
             }
 
@@ -179,6 +180,8 @@ namespace ValheimModToDo
                     }
                 }
             }
+            if (todoResources.HasRecipeListChanged())
+                todoResources.SaveToFile();
         }
 
         public static void OnClickAddCraftItemButton()
@@ -217,7 +220,6 @@ namespace ValheimModToDo
             if (_instance != null)
                 _instance.UpdateToDoPanel();
         }
-
 
         private void OnClearAllCraftingRecipes()
         {

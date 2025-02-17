@@ -1,23 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using HarmonyLib;
 using UnityEngine;
-using BepInEx;
-using BepInEx.Configuration;
-using System.Reflection;
-using UnityEngine.Assertions.Must;
-using UnityEngine.UI;
-using static ClutterSystem;
-using Jotunn.Configs;
-using Mono.Cecil;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace ValheimModToDo
 {
-    internal class ToDoResource
+    public class ToDoResource
     {
         public string id = "";
         public string name = "";
@@ -38,7 +28,7 @@ namespace ValheimModToDo
         }
     }
 
-    internal class ToDoRecipe
+    public class ToDoRecipe
     {
         public string id = "";
         public string name = "";
@@ -95,12 +85,20 @@ namespace ValheimModToDo
     }
 
 
-    internal class ToDoResources
+    public class ToDoResources
     {
         public Dictionary<string, List<ToDoRecipe>> recipes = new();
         public Dictionary<string, int> resources = new();
 
         private readonly object _recipeLock = new();
+        private bool hasRecipeListChanged = false;
+
+        public bool HasRecipeListChanged()
+        {
+            var wasChanged = hasRecipeListChanged;
+            hasRecipeListChanged = false;
+            return wasChanged;
+        }
 
         public void ClearRecipes()
         {
@@ -146,6 +144,7 @@ namespace ValheimModToDo
                         Jotunn.Logger.LogInfo($"ToDoResources: Added Resource {resource.id} amount {amount} now need {resources[resource.id]}");
                     }
                 }
+                hasRecipeListChanged = true;
             }
         }
 
@@ -179,8 +178,106 @@ namespace ValheimModToDo
                     foundRecipes.RemoveAt(0);
                     if (foundRecipes.Count == 0)
                         recipes.Remove(id);
+                    hasRecipeListChanged = true;
                 }
             }
         }
+
+        public Dictionary<string, ToDoRecipe> fakeRecipeDb;
+
+        public Recipe FindRecipe(string id)
+        {
+            var allRecipes = ObjectDB.instance.m_recipes;
+            foreach (var r in allRecipes)
+            {
+                var recipeId = ToDoRecipe.GetRecipeId(r);
+                if (id == recipeId)
+                    return r;
+            }
+            return null;
+        }
+
+        public void LoadFromFile()
+        {
+            var fileName = GetSaveFileName();
+            Jotunn.Logger.LogInfo($"ToDoResources: LoadFromFile({fileName})");
+
+            if (File.Exists(fileName))
+            {
+                var text = File.ReadAllText(fileName);
+                if (text != null)
+                {
+                    ClearRecipes();
+
+                    var serializer = new XmlSerializer(typeof(RecipesList));
+                    var fs = new FileStream(fileName, FileMode.Open);
+                    var saveRecipes = (RecipesList)serializer.Deserialize(fs);
+                    foreach (var saveRecipe in saveRecipes.recipes)
+                    {
+                        if (fakeRecipeDb != null)
+                        {
+                            fakeRecipeDb.TryGetValue(saveRecipe.id, out var recipe);
+                            if (recipe != null)
+                                AddRecipe(recipe);
+                        }
+                        else
+                        {
+                            var recipe = FindRecipe(saveRecipe.id);
+                            if (recipe != null)
+                                AddRecipe(recipe);
+                        }
+                    }
+                    fs.Close();
+                }
+            }
+        }
+
+        public void SaveToFile()
+        {
+            var fileName = GetSaveFileName();
+            Jotunn.Logger.LogInfo($"ToDoResources: SaveToFile({fileName})");
+            var saveRecipes = new RecipesList();
+            foreach (var recipeEntry in recipes)
+            {
+                foreach (var recipe in recipeEntry.Value)
+                {
+                    var saveRecipe = new recipe
+                    {
+                        id = recipe.id,
+                        quality = recipe.quality
+                    };
+                    saveRecipes.recipes.Add(saveRecipe);
+                }
+            }
+            var serializer = new XmlSerializer(typeof(RecipesList));
+            TextWriter writer = new StreamWriter(fileName);
+            serializer.Serialize(writer, saveRecipes);
+            writer.Close();
+        }
+
+        public string GetSaveFileName()
+        {
+            var playerName = Player.m_localPlayer.GetPlayerName();
+            var mapName = "map";
+            var fileName = $"todo-list-for-{playerName}-in-{mapName}-v1.xml";
+            return Path.Combine(Application.persistentDataPath, fileName);
+        }
+    }
+
+
+    [XmlRootAttribute("todolist")]
+    public class RecipesList
+    {
+        [XmlAttribute]
+        public string version = "1";
+        public List<recipe> recipes = new();
+    }
+
+    public class recipe
+    {
+        [XmlAttribute]
+        public string id = "";
+        [XmlAttribute]
+        public int quality = 1;
     }
 }

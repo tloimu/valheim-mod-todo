@@ -1,4 +1,6 @@
 ﻿//using UnityEngine.Assertions;
+using HarmonyLib;
+using System.Collections.Generic;
 using Xunit;
 
 namespace ValheimModToDo
@@ -109,6 +111,46 @@ namespace ValheimModToDo
 
             Assert.Equal(todo.resources.Count, 0);
             Assert.Equal(todo.recipes.Count, 0);
+        }
+
+        [Fact]
+        public void WriteAndReadFile()
+        {
+            var todo = new ToDoResources();
+            var recipe1 = new ToDoRecipe(test_recipe_id_1, "Recipe One");
+            recipe1.resources.Add(new ToDoResource(test_resource_id_1, "Resource One", 1));
+            recipe1.resources.Add(new ToDoResource(test_resource_id_2, "Resource Two", 5));
+
+            var recipe2 = new ToDoRecipe(test_recipe_id_2, "Recipe Two");
+            recipe2.resources.Add(new ToDoResource(test_resource_id_2, "Resource Two", 3));
+            recipe2.resources.Add(new ToDoResource(test_resource_id_3, "Resource Three", 9));
+            todo.AddRecipe(recipe1);
+            todo.AddRecipe(recipe1);
+            todo.AddRecipe(recipe2);
+
+            todo.fakeRecipeDb = new Dictionary<string, ToDoRecipe>
+            {
+                { recipe1.id, recipe1 },
+                { recipe2.id, recipe2 }
+            };
+
+            Assert.Equal(todo.resources.Count, 3);
+            Assert.Equal(todo.recipes.Count, 2);
+            Assert.Equal(todo.resources[test_resource_id_1], 2);
+            Assert.Equal(todo.resources[test_resource_id_2], 13);
+            Assert.Equal(todo.resources[test_resource_id_3], 9);
+
+            todo.SaveToFile();
+
+            todo.ClearRecipes();
+
+            todo.LoadFromFile();
+
+            Assert.Equal(todo.resources.Count, 3);
+            Assert.Equal(todo.recipes.Count, 2);
+            Assert.Equal(todo.resources[test_resource_id_1], 2);
+            Assert.Equal(todo.resources[test_resource_id_2], 13);
+            Assert.Equal(todo.resources[test_resource_id_3], 9);
         }
     }
 }

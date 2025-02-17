@@ -70,6 +70,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Package\plugins\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <VALHEIM_MANAGED>$(VALHEIM_INSTALL)/valheim_Data/Managed</VALHEIM_MANAGED>
     <UNITY_FOLDER>$(SolutionDir)JotunnModUnity</UNITY_FOLDER>
