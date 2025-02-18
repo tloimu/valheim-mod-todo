@@ -36,4 +36,4 @@ Reasons not to use this mod:
  - Does not handle equipment upgrades (item quality) costs correctly
  - Moving the to-do list panel or clicking the **Clear All** button is only available when inventory is open
  - Player inventory and the to-do list panel go on top of each other unless player moves the panel
- - No translations
+ - Missing translations on "Add to To-Do"-button and "To-Do" panel title
