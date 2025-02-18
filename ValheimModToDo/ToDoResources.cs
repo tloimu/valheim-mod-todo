@@ -12,6 +12,7 @@ namespace ValheimModToDo
         public string id = "";
         public string name = "";
         public int amount = 1;
+
         public ToDoResource(string id, string name, int amount)
         {
             this.id = id;
@@ -22,9 +23,8 @@ namespace ValheimModToDo
         public ToDoResource(Piece.Requirement req, int quality)
         {
             id = req.m_resItem.name;
-            name = id; // ???? TODO: Get translation?
+            name = Localization.instance.Localize(id);
             amount = req.GetAmount(quality);
-
         }
     }
 
@@ -45,7 +45,7 @@ namespace ValheimModToDo
         public ToDoRecipe(Piece piece)
         {
             id = piece.name;
-            name = piece.name; // ???? TODO: Get translation?
+            name = Localization.instance.Localize(piece.m_name);
             quality = 1;
             foreach (var resource in piece.m_resources)
             {
@@ -56,7 +56,7 @@ namespace ValheimModToDo
         public ToDoRecipe(Recipe recipe)
         {
             id = ToDoRecipe.GetRecipeId(recipe);
-            name = recipe.name; // ???? TODO: Get translation?
+            name = Localization.instance.Localize(recipe.m_item.m_itemData.m_shared.m_name);
             if (recipe.m_item != null && recipe.m_item.m_itemData != null)
                 quality = recipe.m_item.m_itemData.m_quality;
             else
@@ -83,7 +83,6 @@ namespace ValheimModToDo
             return recipe.name; // ???? TODO: Maybe add quality to this?
         }
     }
-
 
     public class ToDoResources
     {
@@ -185,6 +184,8 @@ namespace ValheimModToDo
 
         public Dictionary<string, ToDoRecipe> fakeRecipeDb;
 
+        public bool IsUnitTesting() { return fakeRecipeDb != null; }
+
         public Recipe FindRecipe(string id)
         {
             var allRecipes = ObjectDB.instance.m_recipes;
@@ -196,6 +197,24 @@ namespace ValheimModToDo
             }
             return null;
         }
+
+        public Piece FindPiece(string id)
+        {
+            if (Player.m_localPlayer != null)
+            {
+                foreach (var pl in Player.m_localPlayer.m_buildPieces.m_availablePieces)
+                {
+                    foreach (var p in pl)
+                    {
+                        if (p.name == id)
+                            return p;
+                    }
+                }
+            }
+
+            return null;
+        }
+
 
         public void LoadFromFile()
         {
@@ -214,21 +233,36 @@ namespace ValheimModToDo
                     var saveRecipes = (RecipesList)serializer.Deserialize(fs);
                     foreach (var saveRecipe in saveRecipes.recipes)
                     {
-                        if (fakeRecipeDb != null)
-                        {
-                            fakeRecipeDb.TryGetValue(saveRecipe.id, out var recipe);
-                            if (recipe != null)
-                                AddRecipe(recipe);
-                        }
+                        if (IsUnitTesting())
+                            AddSavedRecipeInUnitTest(saveRecipe.id);
                         else
-                        {
-                            var recipe = FindRecipe(saveRecipe.id);
-                            if (recipe != null)
-                                AddRecipe(recipe);
-                        }
+                            AddSavedRecipeInValheim(saveRecipe.id);
                     }
                     fs.Close();
                 }
+            }
+        }
+
+
+        public void AddSavedRecipeInUnitTest(string id)
+        {
+            fakeRecipeDb.TryGetValue(id, out var recipe);
+            if (recipe != null)
+                AddRecipe(recipe);
+        }
+
+        public void AddSavedRecipeInValheim(string id)
+        {
+            var recipe = FindRecipe(id);
+            if (recipe != null)
+                AddRecipe(recipe);
+            else
+            {
+                var piece = FindPiece(id);
+                if (piece != null)
+                    AddRecipe(piece);
+                else
+                    Jotunn.Logger.LogWarning($"Loading saved to-do-list: Unable to find recipe or piece [{id}]");
             }
         }
 
@@ -256,6 +290,21 @@ namespace ValheimModToDo
         }
 
         public string GetSaveFileName()
+        {
+            if (IsUnitTesting())
+                return GetSaveFileNameInUnitTest();
+            else
+                return GetSaveFileNameInValheim();
+        }
+
+        public string GetSaveFileNameInUnitTest()
+        {
+            var playerName = "test";
+            var mapName = "map";
+            var fileName = $"todo-list-for-{playerName}-in-{mapName}-v1.xml";
+            return fileName;
+        }
+        public string GetSaveFileNameInValheim()
         {
             var playerName = Player.m_localPlayer.GetPlayerName();
             var mapName = "map";

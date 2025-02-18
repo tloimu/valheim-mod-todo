@@ -1,32 +1,12 @@
-﻿using BepInEx;
-using Jotunn.Entities;
-using Jotunn.GUI;
+﻿using Jotunn.GUI;
 using Jotunn.Managers;
-using Jotunn.Utils;
-using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
-using Jotunn.Configs;
-using UnityEngine.Windows;
-using BepInEx.Configuration;
-using Jotunn;
-using System;
-using System.Collections;
-using System.IO;
 using System.Linq;
-using UnityEngine.SceneManagement;
-
-using Logger = Jotunn.Logger;
-using TMPro;
-using UnityEngine.Assertions.Must;
-using HarmonyLib;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using static System.Net.Mime.MediaTypeNames;
-using System.Resources;
 using System.Text;
 using UnityEngine.Events;
-using Jotunn.Extensions;
+
+using Logger = Jotunn.Logger;
 
 namespace ValheimModToDo
 {
@@ -151,31 +131,38 @@ namespace ValheimModToDo
 
         public string GetResourcesText(ToDoResources todo, Inventory inventory)
         {
-            Jotunn.Logger.LogInfo("To-Do Resources Needed:");
-
+            Jotunn.Logger.LogInfo("ToDoPanelController.GetResourcesText");
             StringBuilder resourcesText = new("", 2048);
-            resourcesText.AppendLine("Resources:");
-            foreach (var res in todo.resources)
+
+            if (todo.recipes.Count() > 0 || todo.resources.Count() > 0)
             {
-                var name = $"$item_{res.Key.ToLower()}";
-                var hasInInventory = inventory.CountItems(name);
-                String line;
-                if (hasInInventory < res.Value)
-                    line = $"  {res.Key}\t[{hasInInventory} / {res.Value}]";
-                else
-                    line = $"  {res.Key}\t[{res.Value}]";
-                Jotunn.Logger.LogInfo(line);
-                resourcesText.AppendLine(line);
+                resourcesText.AppendLine(Localization.instance.Localize("$menu_resources:"));
+                foreach (var res in todo.resources)
+                {
+                    var id = $"$item_{res.Key.ToLower()}";
+                    var name = Localization.instance.Localize(id);
+                    var hasInInventory = inventory.CountItems(id);
+                    string line;
+                    if (hasInInventory < res.Value)
+                        line = $"  {name}\t[{hasInInventory} / {res.Value}]";
+                    else
+                        line = $"  {name}\t[{res.Value}]";
+                    Jotunn.Logger.LogInfo(line);
+                    resourcesText.AppendLine(line);
+                }
+
+                resourcesText.AppendLine("\n\n");
+                resourcesText.AppendLine(Localization.instance.Localize("$inventory_recipes:"));
+                foreach (var rec in todo.recipes)
+                {
+                    if (rec.Value.Count() > 0)
+                        resourcesText.AppendLine($"  {rec.Value[0].name}\t[{rec.Value.Count()}]");
+                }
             }
-            resourcesText.AppendLine("\n\nRecipes:");
-            foreach (var rec in todo.recipes)
-            {
-                var name = rec.Key.RemovePrefix("Recipe_");
-                resourcesText.AppendLine($"  {name}\t[{rec.Value.Count()}]");
-            }
+
             var text = resourcesText.ToString();
 
-            Jotunn.Logger.LogInfo($"Resources Text:\n{text}");
+            Jotunn.Logger.LogInfo($"To-Do List:\n{text}");
             return text;
         }
     }

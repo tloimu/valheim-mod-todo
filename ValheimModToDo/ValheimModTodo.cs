@@ -1,44 +1,23 @@
 ﻿using BepInEx;
 using Jotunn.Entities;
-using Jotunn.GUI;
 using Jotunn.Managers;
-using Jotunn.Utils;
-using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine;
 using Jotunn.Configs;
-using UnityEngine.Windows;
-using BepInEx.Configuration;
-using Jotunn;
 using System;
-using System.Collections;
-using System.IO;
-using System.Linq;
-using UnityEngine.SceneManagement;
-
-using Logger = Jotunn.Logger;
-using TMPro;
-using UnityEngine.Assertions.Must;
 using HarmonyLib;
 using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using static System.Net.Mime.MediaTypeNames;
-using System.Resources;
-using System.Text;
-using Jotunn.Extensions;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine.Events;
+
+using Logger = Jotunn.Logger;
 
 namespace ValheimModToDo
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class ValheimModToDo : BaseUnityPlugin
     {
         public const string PluginGUID = "com.jotunn.ValheimModToDo";
         public const string PluginName = "ValheimModToDo";
-        public const string PluginVersion = "0.0.3";
+        public const string PluginVersion = "0.3.0";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -53,7 +32,7 @@ namespace ValheimModToDo
         private void Awake()
         {
             _instance = this;
-            Jotunn.Logger.LogInfo("TODO-Mod has landed again 12");
+            Jotunn.Logger.LogInfo("To-Do List Mod Awake");
             AddInputs();
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "tloimu.mods.todo");
         }
@@ -74,7 +53,7 @@ namespace ValheimModToDo
             {
                 Name = "Open To-Do Panel",
                 Key = KeyCode.Home,
-                ActiveInCustomGUI = true  // Enable this button in custom GUI
+                ActiveInCustomGUI = true
             };
             InputManager.Instance.AddButton(PluginGUID, ShowGUIButton);
 
@@ -82,7 +61,7 @@ namespace ValheimModToDo
             {
                 Name = "Add Crafting to To-Do list",
                 Key = KeyCode.Insert,
-                ActiveInCustomGUI = true  // Enable this button in custom GUI
+                ActiveInCustomGUI = true
             };
             InputManager.Instance.AddButton(PluginGUID, AddCraftToDoButton);
 
@@ -90,11 +69,11 @@ namespace ValheimModToDo
             {
                 Name = "Clear Crafting To-Do list",
                 Key = KeyCode.Delete,
-                ActiveInCustomGUI = true  // Enable this button in custom GUI
+                ActiveInCustomGUI = true
             };
             InputManager.Instance.AddButton(PluginGUID, ClearAllCraftToDoButton);
         }
-        // Called every frame
+
         private void Update()
         {
             if (ZInput.instance != null)
