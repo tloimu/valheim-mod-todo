@@ -16,6 +16,11 @@ namespace ValheimModToDo
         public GameObject ToDoTextView;
         public GameObject CleanAllButton;
 
+        readonly float width = 250;
+        readonly float height = 600;
+        readonly float margin = 10f;
+        readonly float headerHeight = 50f;
+
         public GameObject CreatePanel(UnityAction onClearAllCraftingRecipes)
         {
             Jotunn.Logger.LogInfo("Make new To-Do panel");
@@ -32,11 +37,6 @@ namespace ValheimModToDo
             }
 
             // Create the panel object
-            float width = 250;
-            float height = 600;
-            float margin = 10f;
-            float headerHeight = 50f;
-
             var panel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,
                 anchorMin: new Vector2(1f, 0.5f),
@@ -106,7 +106,17 @@ namespace ValheimModToDo
         public void SetActive(bool active)
         {
             ToDoPanel?.SetActive(active);
-            CleanAllButton?.SetActive(active);
+            if (!active)
+                SetEditMode(false);
+        }
+
+        public bool EditMode = false;
+
+        public void SetEditMode(bool active)
+        {
+            EditMode = active;
+            CleanAllButton?.SetActive(EditMode);
+            GUIManager.BlockInput(active);
         }
 
         public void UpdateResources(ToDoResources todo, Inventory inventory)

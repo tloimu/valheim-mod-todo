@@ -8,6 +8,7 @@ using HarmonyLib;
 using System.Reflection;
 
 using Logger = Jotunn.Logger;
+using UnityEngine.InputSystem;
 
 namespace ValheimModToDo
 {
@@ -45,6 +46,7 @@ namespace ValheimModToDo
         private ButtonConfig ShowGUIButton;
         private ButtonConfig AddCraftToDoButton;
         private ButtonConfig ClearAllCraftToDoButton;
+        private ButtonConfig ToggleEditModeButton;
 
         private void AddInputs()
         {
@@ -72,6 +74,14 @@ namespace ValheimModToDo
                 ActiveInCustomGUI = true
             };
             InputManager.Instance.AddButton(PluginGUID, ClearAllCraftToDoButton);
+
+            ToggleEditModeButton = new ButtonConfig
+            {
+                Name = "Toggle To-Do List Edit Mode",
+                Key = KeyCode.PageUp,
+                ActiveInCustomGUI = true
+            };
+            InputManager.Instance.AddButton(PluginGUID, ToggleEditModeButton);
         }
 
         private void Update()
@@ -90,6 +100,13 @@ namespace ValheimModToDo
                 {
                     OnClearAllCraftingRecipes();
                 }
+                if (ZInput.GetButtonDown(ToggleEditModeButton.Name))
+                {
+                    if (todoPanel != null && ToDoPanel != null)
+                    {                       
+                        todoPanel.SetEditMode(!todoPanel.EditMode);
+                    }
+                }
             }
         }
 
@@ -101,6 +118,8 @@ namespace ValheimModToDo
             Player.m_localPlayer.GetBuildSelection(out var piece, out var id, out var total, out var category, out var pieceTable);
             if (piece != null)
             {
+                if (piece.name == "piece_repair") // Yes, repair is a "piece" in Valheim
+                    return;
                 Jotunn.Logger.LogInfo($"AddCurrentCraftItemToDoList: {piece.name}, total {total}");
                 todoResources.AddRecipe(piece);
                 UpdateToDoPanel();
@@ -112,24 +131,16 @@ namespace ValheimModToDo
         private void TogglePanel()
         {
             Jotunn.Logger.LogInfo("Toggle To-Do panel");
-            // Create the panel if it does not exist
             if (!ToDoPanel)
             {
                 todoResources.LoadFromFile();
                 ToDoPanel = todoPanel.CreatePanel(OnClearAllCraftingRecipes);
             }
 
-            // Switch the current state
             bool state = !ToDoPanel.activeSelf;
-
             if (state)
                 UpdateToDoPanel();
-
-            // Set the active state of the panel
             todoPanel.SetActive(state);
-
-            // Toggle input for the player and camera while displaying the GUI
-            // GUIManager.BlockInput(state);
         }
 
         public void UpdateToDoPanel()
@@ -164,6 +175,11 @@ namespace ValheimModToDo
             var gui = InventoryGui.instance;
             var selectedRecipe = gui.m_selectedRecipe;
             var selectedVariant = gui.m_selectedVariant;
+            int qualityLevel = 1;
+            if (gui.InUpradeTab())
+            {
+                qualityLevel = 1;
+            }
             Jotunn.Logger.LogInfo($"m_selectedRecipe={selectedRecipe.Recipe}");
             Jotunn.Logger.LogInfo($"m_selectedVariant={selectedVariant}");
             Jotunn.Logger.LogInfo($"m_craftRecipe.m_craftingStation={selectedRecipe.Recipe?.m_craftingStation}");
@@ -174,8 +190,9 @@ namespace ValheimModToDo
                 var resources = recipe.m_item.m_piece.m_resources;
                 foreach (var res in resources)
                 {
-                    // recipe.GetAmount(qualityLevel, out var need);
-                    Jotunn.Logger.LogInfo($"  - {res.m_resItem.name} [{res.m_amount}]");
+                    var resQ = res.m_resItem.m_itemData.m_quality;
+                    var actualAmount = recipe.GetAmount(qualityLevel, out var need, out var itemData);
+                    Jotunn.Logger.LogInfo($"  - {res.m_resItem.name} [{res.m_amount}] upgrade [{actualAmount}] resource quality [{resQ}]");
                 }
             }
             if (_instance != null)
