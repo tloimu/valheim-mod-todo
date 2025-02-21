@@ -11,7 +11,7 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
 
 # To-Do
 
- - Add crafting recipe with Insert-key
+ - Tabular lists in resources and recipes
  - Add way to remove and add recipes and their amounts from/in the list (in Edit Mode)
  - Add Upgrades to recipies (needs revising the way recipes are stored in the ToDoList)
  - Add free text notes
@@ -19,12 +19,15 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
 	+ show and allow pressing Clear All, Edit Notes, Remove Eecipe etc.
 	+ Select from preset of recipes
 	+ Add, edit and delete recipes presets
+ - "Hide Panel but show Text"-mode option
  - Consider panel to follow right edge of Inventory panel when Inventory is open and then when closed, move back to right side of the screen (by default)
+ - Add crafting recipe with Insert-key
  - Allow making recipe presets (e.g. Ahjo + Työpöytä + ...)
  - Allow tracking a container (e.g. ship) inventory instead of just player inventory (filling a ship with proper set of items)
  - Configuration options:
 	+ show todo list as just floating text vs. wood panel
 	+ Keybindings
+	+ Panel Location / Follow Inventory
  - Saving to-do list persistently (per map, per character)
 
 

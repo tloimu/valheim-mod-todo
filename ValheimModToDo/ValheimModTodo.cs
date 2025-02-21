@@ -118,7 +118,7 @@ namespace ValheimModToDo
             Player.m_localPlayer.GetBuildSelection(out var piece, out var id, out var total, out var category, out var pieceTable);
             if (piece != null)
             {
-                if (piece.name == "piece_repair") // Yes, repair is a "piece" in Valheim
+                if (piece.name == "piece_repair") // Repair function is a build piece in Valheim
                     return;
                 Jotunn.Logger.LogInfo($"AddCurrentCraftItemToDoList: {piece.name}, total {total}");
                 todoResources.AddRecipe(piece);

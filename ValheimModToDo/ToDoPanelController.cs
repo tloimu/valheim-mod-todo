@@ -20,6 +20,7 @@ namespace ValheimModToDo
         readonly float height = 600;
         readonly float margin = 10f;
         readonly float headerHeight = 50f;
+        readonly float listHeight = 400f;
 
         public GameObject CreatePanel(UnityAction onClearAllCraftingRecipes)
         {
@@ -41,7 +42,7 @@ namespace ValheimModToDo
                 parent: GUIManager.CustomGUIFront.transform,
                 anchorMin: new Vector2(1f, 0.5f),
                 anchorMax: new Vector2(1f, 0.5f),
-                position: new Vector2(-width, 0),
+                position: new Vector2(-width/2, 0),
                 width: width,
                 height: height,
                 draggable: true);
@@ -68,7 +69,6 @@ namespace ValheimModToDo
                 addContentSizeFitter: false);
 
             // Create the text object
-            float listHeight = 400f;
             ToDoTextView = GUIManager.Instance.CreateText(
                 text: "Resources",
                 parent: panel.transform,
@@ -97,7 +97,7 @@ namespace ValheimModToDo
 
             // Add a listener to the button to close the panel again
             Button button = CleanAllButton.GetComponent<Button>();
-            button.onClick.AddListener(onClearAllCraftingRecipes);
+            button?.onClick.AddListener(onClearAllCraftingRecipes);
 
             ToDoPanel = panel;
             return panel;
@@ -116,7 +116,23 @@ namespace ValheimModToDo
         {
             EditMode = active;
             CleanAllButton?.SetActive(EditMode);
-            GUIManager.BlockInput(active);
+            GUIManager.BlockInput(EditMode);
+
+            var textRect = ToDoTextView.GetComponent<RectTransform>();
+            var panelRect = ToDoPanel.GetComponent<RectTransform>();
+            if (textRect != null && panelRect != null)
+            {
+                if (EditMode)
+                {
+                    textRect.anchoredPosition = new Vector2(0f, -((listHeight + 2 * headerHeight + 4 * margin) * 0.5f));
+                    panelRect.anchoredPosition = new Vector2(-width/2, 0);
+                }
+                else
+                {
+                    textRect.anchoredPosition = new Vector2(-width, -((listHeight + 2 * headerHeight + 4 * margin) * 0.5f));
+                    panelRect.anchoredPosition = new Vector2(width/2, 0);
+                }
+            }
         }
 
         public void UpdateResources(ToDoResources todo, Inventory inventory)
