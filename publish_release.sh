@@ -3,7 +3,7 @@
 PACKAGE=ValheimModToDo/Package
 PLUGINS=ValheimModToDo/Package/plugins
 DLL=$PLUGINS/ValheimModToDo.dll
-FILES=( "$PACKAGE/$README" "$PACKAGE/CHANGELOG.md" "$PACKAGE/icon.png" "$PACKAGE/manifest.json" )
+FILES=("$PACKAGE/README.md" "$PACKAGE/CHANGELOG.md" "$PACKAGE/icon.png" "$PACKAGE/manifest.json")
 #TRANSLATIONS=Translations
 
 VERSION=$1
@@ -25,6 +25,7 @@ if [ ! -w "$PLUGINS" ]; then
     exit 1
 fi
 
+echo "cp ${FILES[@]} $PLUGINS"
 cp ${FILES[@]} $PLUGINS
 #cp -rf "$TRANSLATIONS" "$PLUGINS/"  || { echo "Error: Failed to copy Translations"; exit 1; }
 

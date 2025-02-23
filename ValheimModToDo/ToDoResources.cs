@@ -53,15 +53,11 @@ namespace ValheimModToDo
             }
         }
 
-        public ToDoRecipe(Recipe recipe)
+        public ToDoRecipe(Recipe recipe, int quality)
         {
-            id = ToDoRecipe.GetRecipeId(recipe);
+            id = recipe.name;
+            this.quality = quality;
             name = Localization.instance.Localize(recipe.m_item.m_itemData.m_shared.m_name);
-            if (recipe.m_item != null && recipe.m_item.m_itemData != null)
-                quality = recipe.m_item.m_itemData.m_quality;
-            else
-                quality = 1;
-
             if (recipe.m_item != null && recipe.m_item.m_piece != null)
             {
                 foreach (var resource in recipe.m_item.m_piece.m_resources)
@@ -78,9 +74,22 @@ namespace ValheimModToDo
             }
         }
 
-        static public string GetRecipeId(Recipe recipe)
+        static public string GetRecipeKey(Recipe recipe, int quality)
         {
-            return recipe.name; // ???? TODO: Maybe add quality to this?
+            return GetRecipeKey(recipe.name, quality);
+        }
+
+        static public string GetRecipeKey(ToDoRecipe recipe)
+        {
+            return GetRecipeKey(recipe.id, recipe.quality);
+        }
+
+        static public string GetRecipeKey(string name, int quality)
+        {
+            if (quality == 1)
+                return name;
+            else
+                return $"{name}/upgrade";
         }
     }
 
@@ -108,9 +117,9 @@ namespace ValheimModToDo
             }
         }
 
-        public void AddRecipe(Recipe recipe)
+        public void AddRecipe(Recipe recipe, int quality)
         {
-            AddRecipe(new ToDoRecipe(recipe));
+            AddRecipe(new ToDoRecipe(recipe, quality));
         }
 
         public void AddRecipe(Piece piece)
@@ -120,17 +129,18 @@ namespace ValheimModToDo
 
         public void AddRecipe(ToDoRecipe recipe)
         {
-            Jotunn.Logger.LogInfo($"ToDoResources: AddRecipe({recipe.name})");
+            var recipeKey = ToDoRecipe.GetRecipeKey(recipe);
+            Jotunn.Logger.LogInfo($"ToDoResources: AddRecipe({recipeKey})");
             lock (_recipeLock)
             {
-                if (recipes.TryGetValue(recipe.id, out var list))
+                if (recipes.TryGetValue(recipeKey, out var list))
                 {
                     list.Add(recipe);
-                    Jotunn.Logger.LogInfo($"ToDoResources: Added Recipe {recipe.name}");
+                    Jotunn.Logger.LogInfo($"ToDoResources: Added Recipe {recipeKey}");
                 }
                 else
                 {
-                    recipes.Add(recipe.id, new List<ToDoRecipe> { recipe });
+                    recipes.Add(recipeKey, new List<ToDoRecipe> { recipe });
                 }
                 foreach (var resource in recipe.resources)
                 {
@@ -147,17 +157,22 @@ namespace ValheimModToDo
             }
         }
 
-        public void RemoveRecipe(Recipe recipe)
+        public void RemoveRecipe(Recipe recipe, int quality)
         {
-            RemoveRecipe(ToDoRecipe.GetRecipeId(recipe));
+            RemoveRecipe(ToDoRecipe.GetRecipeKey(recipe, quality));
         }
 
-        public void RemoveRecipe(string id)
+        public void RemoveRecipe(string name, int quality)
         {
-            Jotunn.Logger.LogInfo($"ToDoResources: RemoveRecipe({id})");
+            RemoveRecipe(ToDoRecipe.GetRecipeKey(name, quality));
+        }
+
+        public void RemoveRecipe(string recipeKey)
+        {
+            Jotunn.Logger.LogInfo($"ToDoResources: RemoveRecipe({recipeKey})");
             lock (_recipeLock)
             {
-                if (recipes.TryGetValue(id, out var foundRecipes))
+                if (recipes.TryGetValue(recipeKey, out var foundRecipes))
                 {
                     var recipe = foundRecipes.First();
                     foreach (var resource in recipe.resources)
@@ -176,7 +191,7 @@ namespace ValheimModToDo
 
                     foundRecipes.RemoveAt(0);
                     if (foundRecipes.Count == 0)
-                        recipes.Remove(id);
+                        recipes.Remove(recipeKey);
                     hasRecipeListChanged = true;
                 }
             }
@@ -186,19 +201,18 @@ namespace ValheimModToDo
 
         public bool IsUnitTesting() { return fakeRecipeDb != null; }
 
-        public Recipe FindRecipe(string id)
+        public Recipe FindRecipe(string name)
         {
             var allRecipes = ObjectDB.instance.m_recipes;
             foreach (var r in allRecipes)
             {
-                var recipeId = ToDoRecipe.GetRecipeId(r);
-                if (id == recipeId)
+                if (name == r.name)
                     return r;
             }
             return null;
         }
 
-        public Piece FindPiece(string id)
+        public Piece FindPiece(string name)
         {
             if (Player.m_localPlayer != null)
             {
@@ -206,7 +220,7 @@ namespace ValheimModToDo
                 {
                     foreach (var p in pl)
                     {
-                        if (p.name == id)
+                        if (p.name == name)
                             return p;
                     }
                 }
@@ -223,46 +237,55 @@ namespace ValheimModToDo
 
             if (File.Exists(fileName))
             {
-                var text = File.ReadAllText(fileName);
-                if (text != null)
+                ClearRecipes();
+                try
                 {
-                    ClearRecipes();
-
-                    var serializer = new XmlSerializer(typeof(RecipesList));
-                    var fs = new FileStream(fileName, FileMode.Open);
-                    var saveRecipes = (RecipesList)serializer.Deserialize(fs);
-                    foreach (var saveRecipe in saveRecipes.recipes)
+                    var text = File.ReadAllText(fileName);
+                    if (text != null)
                     {
-                        if (IsUnitTesting())
-                            AddSavedRecipeInUnitTest(saveRecipe.id);
-                        else
-                            AddSavedRecipeInValheim(saveRecipe.id);
+                        var serializer = new XmlSerializer(typeof(RecipesList));
+                        var fs = new FileStream(fileName, FileMode.Open);
+                        var saveRecipes = (RecipesList)serializer.Deserialize(fs);
+                        foreach (var saveRecipe in saveRecipes.recipes)
+                        {
+                            if (IsUnitTesting())
+                                AddSavedRecipeInUnitTest(saveRecipe.id, saveRecipe.quality);
+                            else
+                                AddSavedRecipeInValheim(saveRecipe.id, saveRecipe.quality);
+                        }
+                        fs.Close();
                     }
-                    fs.Close();
+                }
+                catch (IOException e)
+                {
+                    Jotunn.Logger.LogError($"ToDoResources: LoadFromFile({fileName}) exception:{e.Message}");
                 }
             }
         }
 
 
-        public void AddSavedRecipeInUnitTest(string id)
+        public void AddSavedRecipeInUnitTest(string name, int quality)
         {
-            fakeRecipeDb.TryGetValue(id, out var recipe);
+            fakeRecipeDb.TryGetValue(name, out var recipe);
             if (recipe != null)
+            {
+                recipe.quality = quality;
                 AddRecipe(recipe);
+            }
         }
 
-        public void AddSavedRecipeInValheim(string id)
+        public void AddSavedRecipeInValheim(string name, int quality)
         {
-            var recipe = FindRecipe(id);
+            var recipe = FindRecipe(name);
             if (recipe != null)
-                AddRecipe(recipe);
+                AddRecipe(recipe, quality);
             else
             {
-                var piece = FindPiece(id);
+                var piece = FindPiece(name);
                 if (piece != null)
                     AddRecipe(piece);
                 else
-                    Jotunn.Logger.LogWarning($"Loading saved to-do-list: Unable to find recipe or piece [{id}]");
+                    Jotunn.Logger.LogWarning($"Loading saved to-do-list: Unable to find recipe or piece [{name}]");
             }
         }
 

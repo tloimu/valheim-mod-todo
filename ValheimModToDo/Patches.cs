@@ -31,7 +31,6 @@ namespace ValheimModToDo.Patches
     {
         public static void Postfix(InventoryGui __instance, Player player)
         {
-            Jotunn.Logger.LogInfo("InventoryGui.DoCrafting()");
             if (player != Player.m_localPlayer)
                 return;
             var recipe = __instance.m_selectedRecipe.Recipe;
@@ -39,12 +38,8 @@ namespace ValheimModToDo.Patches
             var qualityLevel = (craftUpgradeItem == null) ? 1 : (craftUpgradeItem.m_quality + 1);
             if (recipe)
             {
-                Jotunn.Logger.LogInfo($"InventoryGui.DoCrafting {recipe.name} quality {qualityLevel}");
-                foreach (var res in recipe.m_resources)
-                {
-                    Jotunn.Logger.LogInfo($"  - {res.m_resItem.name} [{res.m_amount}]");
-                }
-                ValheimModToDo.OnRemoveCraftToDo(recipe.name);
+                Jotunn.Logger.LogInfo($"InventoryGui.DoCrafting({recipe.name})");
+                ValheimModToDo.OnRemoveCraftToDo(recipe, qualityLevel);
             }
         }
     }
@@ -57,7 +52,7 @@ namespace ValheimModToDo.Patches
             if (__instance != Player.m_localPlayer)
                 return;
             Jotunn.Logger.LogInfo($"Player.PlacePiece: {piece.name}");
-            ValheimModToDo.OnRemoveCraftToDo(piece.name);
+            ValheimModToDo.OnRemoveCraftToDo(piece);
         }
     }
 }

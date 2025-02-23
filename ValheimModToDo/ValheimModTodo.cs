@@ -178,31 +178,27 @@ namespace ValheimModToDo
             int qualityLevel = 1;
             if (gui.InUpradeTab())
             {
-                qualityLevel = 1;
+                qualityLevel = 2;
             }
             Jotunn.Logger.LogInfo($"m_selectedRecipe={selectedRecipe.Recipe}");
             Jotunn.Logger.LogInfo($"m_selectedVariant={selectedVariant}");
             Jotunn.Logger.LogInfo($"m_craftRecipe.m_craftingStation={selectedRecipe.Recipe?.m_craftingStation}");
+            Jotunn.Logger.LogInfo($"qualityLevel={qualityLevel}");
             var recipe = selectedRecipe.Recipe;
-            if (recipe.m_item != null && recipe.m_item.m_piece != null)
-            {
-                Jotunn.Logger.LogInfo($"m_piece={recipe.m_item.m_piece.m_name}");
-                var resources = recipe.m_item.m_piece.m_resources;
-                foreach (var res in resources)
-                {
-                    var resQ = res.m_resItem.m_itemData.m_quality;
-                    var actualAmount = recipe.GetAmount(qualityLevel, out var need, out var itemData);
-                    Jotunn.Logger.LogInfo($"  - {res.m_resItem.name} [{res.m_amount}] upgrade [{actualAmount}] resource quality [{resQ}]");
-                }
-            }
             if (_instance != null)
-                _instance.AddCraftToDo(recipe);
+                _instance.AddCraftToDo(recipe, qualityLevel);
         }
 
-        public static void OnRemoveCraftToDo(String name)
+        public static void OnRemoveCraftToDo(Recipe recipe, int quality = 1)
         {
             if (_instance != null)
-                _instance.RemoveCraftToDo(name);
+                _instance.RemoveCraftToDo(recipe, quality);
+        }
+
+        public static void OnRemoveCraftToDo(Piece piece, int quality = 1)
+        {
+            if (_instance != null)
+                _instance.RemoveCraftToDo(piece, quality);
         }
 
         public static void OnInventoryChanged()
@@ -217,22 +213,24 @@ namespace ValheimModToDo
             UpdateToDoPanel();
         }
 
-        private void AddCraftToDo(Recipe recipe)
+        private void AddCraftToDo(Recipe recipe, int quality)
         {
-            Jotunn.Logger.LogInfo($"Add Craft To-Do: {recipe.name} amount {recipe.m_amount} item {recipe.m_item.name}");
-            var resources = recipe.m_resources;
-            foreach (var res in resources)
-            {
-                Jotunn.Logger.LogInfo($"  - {res.m_resItem.name} [{res.m_amount}]");
-            }
-            todoResources.AddRecipe(recipe);
+            Jotunn.Logger.LogInfo($"Add Craft To-Do: {recipe.name} amount {recipe.m_amount} quality {quality}");
+            todoResources.AddRecipe(recipe, quality);
             UpdateToDoPanel();
         }
 
-        private void RemoveCraftToDo(String name)
+        private void RemoveCraftToDo(Recipe recipe, int quality)
         {
-            Jotunn.Logger.LogInfo($"Remove Craft To-Do: {name}");
-            todoResources.RemoveRecipe(name);
+            Jotunn.Logger.LogInfo($"Remove Craft To-Do: {recipe.name} quality {quality}");
+            todoResources.RemoveRecipe(recipe, quality);
+            UpdateToDoPanel();
+        }
+
+        private void RemoveCraftToDo(Piece piece, int quality)
+        {
+            Jotunn.Logger.LogInfo($"Remove Build To-Do: {piece.name} quality {quality}");
+            todoResources.RemoveRecipe(piece.name, quality);
             UpdateToDoPanel();
         }
     }

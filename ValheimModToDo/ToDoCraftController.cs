@@ -16,6 +16,7 @@ namespace ValheimModToDo
         public static GameObject goAddCraftToDo;
         public static Button btnAddCraftToDo;
         public static TMP_Text txtAddCraftToDo;
+        public static RectTransform InventoryPanelPos;
 
         public static void CreateAddCraftToDoButton(UnityAction onClickAddCraftItemButton)
         {
@@ -31,6 +32,8 @@ namespace ValheimModToDo
                 Jotunn.Logger.LogDebug("craftAddCraftToDoButton already exists. destroy it.");
                 Destroy(goAddCraftToDo);
             }
+
+            InventoryPanelPos = InventoryGui.instance?.gameObject?.GetComponent<RectTransform>();
 
             Jotunn.Logger.LogDebug("Instantiate");
             goAddCraftToDo = Instantiate(craftButton);

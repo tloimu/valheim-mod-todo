@@ -22,20 +22,27 @@ namespace ValheimModToDo
         readonly float headerHeight = 50f;
         readonly float listHeight = 400f;
 
-        public GameObject CreatePanel(UnityAction onClearAllCraftingRecipes)
+        private bool IsGuiManagerReady()
         {
-            Jotunn.Logger.LogInfo("Make new To-Do panel");
             if (GUIManager.Instance == null)
             {
                 Logger.LogError("GUIManager instance is null");
-                return null;
+                return false;
             }
 
             if (!GUIManager.CustomGUIFront)
             {
                 Logger.LogError("GUIManager CustomGUI is null");
-                return null;
+                return false;
             }
+            return true;
+        }
+
+        public GameObject CreatePanel(UnityAction onClearAllCraftingRecipes)
+        {
+            Jotunn.Logger.LogInfo("Make new To-Do panel");
+            if (!IsGuiManagerReady())
+                return null;
 
             // Create the panel object
             var panel = GUIManager.Instance.CreateWoodpanel(
@@ -48,9 +55,7 @@ namespace ValheimModToDo
                 draggable: true);
             panel.SetActive(false);
 
-            // Add the Jötunn draggable Component to the panel
-            // Note: This is normally automatically added when using CreateWoodpanel()
-            DragWindowCntrl.ApplyDragWindowCntrl(panel);
+            panel.AddComponent<DragWindowCntrl>();
 
             // Create the text object
             GUIManager.Instance.CreateText(
@@ -165,16 +170,19 @@ namespace ValheimModToDo
                 resourcesText.AppendLine(Localization.instance.Localize("$menu_resources:"));
                 foreach (var res in todo.resources)
                 {
-                    var id = $"$item_{res.Key.ToLower()}";
-                    var name = Localization.instance.Localize(id);
-                    var hasInInventory = inventory.CountItems(id);
-                    string line;
-                    if (hasInInventory < res.Value)
-                        line = $"  {name}\t[{hasInInventory} / {res.Value}]";
-                    else
-                        line = $"  {name}\t[{res.Value}]";
-                    Jotunn.Logger.LogInfo(line);
-                    resourcesText.AppendLine(line);
+                    if (res.Value > 0)
+                    {
+                        var id = $"$item_{res.Key.ToLower()}";
+                        var name = Localization.instance.Localize(id);
+                        var hasInInventory = inventory.CountItems(id);
+                        string line;
+                        if (hasInInventory < res.Value)
+                            line = $"  {name}\t[{hasInInventory} / {res.Value}]";
+                        else
+                            line = $"  {name}\t[{res.Value}]";
+                        Jotunn.Logger.LogInfo(line);
+                        resourcesText.AppendLine(line);
+                    }
                 }
 
                 resourcesText.AppendLine("\n\n");
@@ -182,7 +190,13 @@ namespace ValheimModToDo
                 foreach (var rec in todo.recipes)
                 {
                     if (rec.Value.Count() > 0)
-                        resourcesText.AppendLine($"  {rec.Value[0].name}\t[{rec.Value.Count()}]");
+                    {
+                        var recipe = rec.Value[0];
+                        string is_upgrade = "";
+                        if (recipe.quality > 1)
+                            is_upgrade = Localization.instance.Localize(" ($piece_upgrade)");
+                        resourcesText.AppendLine($"  {recipe.name}{is_upgrade}\t[{rec.Value.Count()}]");
+                    }
                 }
             }
 
