@@ -13,13 +13,12 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
 
  - Tabular lists in resources and recipes
  - Add way to remove and add recipes and their amounts from/in the list (in Edit Mode)
- - Add Upgrades to recipies (needs revising the way recipes are stored in the ToDoList)
  - Add free text notes
- - With Shift+Home or (PgUp to toggle mode) -> Open to-do view in Edit Mode (block input, show buttons and edit boxes etc.)
-	+ show and allow pressing Clear All, Edit Notes, Remove Eecipe etc.
-	+ Select from preset of recipes
-	+ Add, edit and delete recipes presets
- - "Hide Panel but show Text"-mode option
+ - Edit Mode: `<PgUp>` to toggle mode -> Open to-do view in Edit Mode (block input, show buttons and edit boxes etc.)
+	+ show and allow pressing Clear All, Edit Notes, Remove Recipe etc.
+ 	+ "Hide Panel but show Background Text"-mode option (use Custom Background GUI)
+	+ Select, add, edit and delete from preset of recipes (Requires: Presets)
+ 	+ "Include Container Items"-mode option (Requires: Container Tracking)
  - Consider panel to follow right edge of Inventory panel when Inventory is open and then when closed, move back to right side of the screen (by default)
  - Add crafting recipe with Insert-key
  - Allow making recipe presets (e.g. Ahjo + Työpöytä + ...)
