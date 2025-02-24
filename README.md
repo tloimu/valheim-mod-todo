@@ -19,7 +19,6 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
  	+ "Hide Panel but show Background Text"-mode option (use Custom Background GUI)
 	+ Select, add, edit and delete from preset of recipes (Requires: Presets)
  	+ "Include Container Items"-mode option (Requires: Container Tracking)
- - Consider panel to follow right edge of Inventory panel when Inventory is open and then when closed, move back to right side of the screen (by default)
  - Add crafting recipe with Insert-key
  - Allow making recipe presets (e.g. Ahjo + Työpöytä + ...)
  - Allow tracking a container (e.g. ship) inventory instead of just player inventory (filling a ship with proper set of items)
@@ -27,7 +26,6 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
 	+ show todo list as just floating text vs. wood panel
 	+ Keybindings
 	+ Panel Location / Follow Inventory
- - Saving to-do list persistently (per map, per character)
 
 
 # Background Material
