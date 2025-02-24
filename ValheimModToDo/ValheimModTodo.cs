@@ -26,38 +26,46 @@ namespace ValheimModToDo
 
         private static ValheimModToDo _instance;
 
-        private ToDoResources todoResources = new();
+        private readonly ToDoResources todoResources = new();
 
-        private ToDoPanelController todoPanel = new();
+        private readonly ToDoPanelController todoPanel = new();
 
         private void Awake()
         {
             _instance = this;
             Jotunn.Logger.LogInfo("To-Do List Mod Awake");
             AddInputs();
+            GUIManager.OnCustomGUIAvailable += OnRebuildUi;
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "tloimu.mods.todo");
+        }
+
+        public void OnRebuildUi()
+        {
+            Jotunn.Logger.LogInfo($"OnRebuildUi [{this.GetInstanceID()}]");
+            todoPanel.SetupUi(todoResources);
         }
 
         private void OnDestroy()
         {
+            Jotunn.Logger.LogInfo("To-Do List Mod OnDestroy");
+            GUIManager.OnCustomGUIAvailable -= OnRebuildUi;
             _instance = null;
         }
 
-        private ButtonConfig ShowGUIButton;
+        private ButtonConfig ToggleVisibiltyButton;
         private ButtonConfig AddCraftToDoButton;
-        private ButtonConfig ClearAllCraftToDoButton;
         private ButtonConfig ToggleEditModeButton;
 
         private void AddInputs()
         {
             // Add key bindings on the fly
-            ShowGUIButton = new ButtonConfig
+            ToggleVisibiltyButton = new ButtonConfig
             {
                 Name = "Open To-Do Panel",
                 Key = KeyCode.Home,
                 ActiveInCustomGUI = true
             };
-            InputManager.Instance.AddButton(PluginGUID, ShowGUIButton);
+            InputManager.Instance.AddButton(PluginGUID, ToggleVisibiltyButton);
 
             AddCraftToDoButton = new ButtonConfig
             {
@@ -66,14 +74,6 @@ namespace ValheimModToDo
                 ActiveInCustomGUI = true
             };
             InputManager.Instance.AddButton(PluginGUID, AddCraftToDoButton);
-
-            ClearAllCraftToDoButton = new ButtonConfig
-            {
-                Name = "Clear Crafting To-Do list",
-                Key = KeyCode.Delete,
-                ActiveInCustomGUI = true
-            };
-            InputManager.Instance.AddButton(PluginGUID, ClearAllCraftToDoButton);
 
             ToggleEditModeButton = new ButtonConfig
             {
@@ -88,24 +88,17 @@ namespace ValheimModToDo
         {
             if (ZInput.instance != null)
             {
-                if (ZInput.GetButtonDown(ShowGUIButton.Name))
+                if (ZInput.GetButtonDown(ToggleVisibiltyButton.Name))
                 {
-                    TogglePanel();
+                    todoPanel.ToggleVisibilty();
                 }
                 if (ZInput.GetButtonDown(AddCraftToDoButton.Name))
                 {
                     AddCurrentSelectionToDoList();
                 }
-                if (ZInput.GetButtonDown(ClearAllCraftToDoButton.Name))
-                {
-                    OnClearAllCraftingRecipes();
-                }
                 if (ZInput.GetButtonDown(ToggleEditModeButton.Name))
                 {
-                    if (todoPanel != null && ToDoPanel != null)
-                    {                       
-                        todoPanel.SetEditMode(!todoPanel.EditMode);
-                    }
+                    todoPanel.ToggleEditMode();
                 }
             }
         }
@@ -126,46 +119,9 @@ namespace ValheimModToDo
             }
         }
 
-        private GameObject ToDoPanel;
-
-        private void TogglePanel()
-        {
-            Jotunn.Logger.LogInfo("Toggle To-Do panel");
-            if (!ToDoPanel)
-            {
-                todoResources.LoadFromFile();
-                ToDoPanel = todoPanel.CreatePanel(OnClearAllCraftingRecipes);
-            }
-
-            bool state = !ToDoPanel.activeSelf;
-            if (state)
-                UpdateToDoPanel();
-            todoPanel.SetActive(state);
-        }
-
         public void UpdateToDoPanel()
         {
-            var inventory = Player.m_localPlayer.GetInventory();
-            todoPanel.UpdateResources(todoResources, inventory);
-
-            if (InventoryGui.instance != null && InventoryGui.instance.IsContainerOpen())
-            {
-                var container = InventoryGui.instance.m_currentContainer;
-                if (container != null)
-                {
-                    var containerInventory = container.GetInventory();
-                    if (containerInventory != null)
-                    {
-                        Jotunn.Logger.LogInfo($"Container: {container.name} [{container.m_name}] id [{container.GetInstanceID()}]");
-                        foreach (var item in containerInventory.m_inventory)
-                        {
-                            Jotunn.Logger.LogInfo($"  {item.m_shared.m_name} stack {item.m_stack} quality {item.m_quality}");
-                        }
-                    }
-                }
-            }
-            if (todoResources.HasRecipeListChanged())
-                todoResources.SaveToFile();
+            todoPanel.UpdateToDoPanel();
         }
 
         public static void OnClickAddCraftItemButton()
@@ -207,10 +163,15 @@ namespace ValheimModToDo
                 _instance.UpdateToDoPanel();
         }
 
-        private void OnClearAllCraftingRecipes()
+        public static void OnShowInventory()
         {
-            todoResources.ClearRecipes();
-            UpdateToDoPanel();
+            if (_instance != null && _instance.todoPanel != null)
+                _instance.todoPanel.OnShowInventoryGui();
+        }
+        public static void OnHideInventory()
+        {
+            if (_instance != null && _instance.todoPanel != null)
+                _instance.todoPanel.OnHideInventoryGui();
         }
 
         private void AddCraftToDo(Recipe recipe, int quality)
@@ -233,5 +194,5 @@ namespace ValheimModToDo
             todoResources.RemoveRecipe(piece.name, quality);
             UpdateToDoPanel();
         }
-    }
+   }
 }

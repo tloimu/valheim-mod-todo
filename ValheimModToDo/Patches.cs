@@ -44,6 +44,25 @@ namespace ValheimModToDo.Patches
         }
     }
 
+    [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.Show))]
+    public static class InventoryGui_Show_Patch
+    {
+        public static void Postfix(InventoryGui __instance, Container container, int activeGroup)
+        {
+            ValheimModToDo.OnShowInventory();
+        }
+    }
+
+    [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.Hide))]
+    public static class InventoryGui_Hide_Patch
+    {
+        public static void Postfix(InventoryGui __instance)
+        {
+            ValheimModToDo.OnHideInventory();
+        }
+    }
+
+
     [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
     public static class Player_PlacePiece_Patch
     {
@@ -53,6 +72,18 @@ namespace ValheimModToDo.Patches
                 return;
             Jotunn.Logger.LogInfo($"Player.PlacePiece: {piece.name}");
             ValheimModToDo.OnRemoveCraftToDo(piece);
+        }
+    }
+
+    [HarmonyPatch(typeof(Player), nameof(Player.OnRespawn))]
+    public static class Player_OnRespawn_Patch
+    {
+        public static void Postfix(Player __instance)
+        {
+            Jotunn.Logger.LogInfo($"Player.OnRespawn [{__instance.name}]");
+            if (__instance != Player.m_localPlayer)
+                return;
+            ValheimModToDo.OnInventoryChanged();
         }
     }
 }

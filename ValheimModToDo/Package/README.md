@@ -9,13 +9,15 @@ Shoutout to game Satisfactory for inspirations.
 
 ## Features
 
-Show/hide the *To-Do List* panel pressing <Home> key. Toggling the panel to visible will also force update it in case something is not in sync with your inventory and the to-do list panel.
+Show/hide the *To-Do List* panel pressing `<Home>` key. Toggling the panel to visible will also force update it in case something is not in sync with your inventory and the to-do list panel.
 
-Add the selected crafting recipe to the list from crafting panel by pressing <Insert> key or by clicking the new **Add to To-Do** button.
+Add the selected crafting recipe to the list from crafting panel by pressing `<Insert>` key or by clicking the new **Add to To-Do** button.
 
-Add the building recipe to the list by pressing <Insert> key while placing a building piece.
+Add the building recipe to the list by pressing `<Insert>` key while placing a building piece.
 
-Clear the list by pressing <Delete> key or clicking the **Clear All** button on the list panel.
+Change panel to *Edit Mode* by pressing `<PgUp>` key. In Edit Mode, you can edit the To-Do List in more detail in a separate panel that appears.
+
+Clear the list by pressing `<Delete>` key or clicking the **Clear Crafting To-Do list** button on the To-Do List panel when in Edit Mode.
 
 The needed amount of resources is automatically updated when you:
 
@@ -33,7 +35,5 @@ The To-Do List is stored in a file `todo-list-for-{PlayerName}-in-map-v1.xml` in
 
 Reasons not to use this mod:
 
- - Does not handle equipment upgrades (item quality) costs correctly
- - Moving the to-do list panel or clicking the **Clear All** button is only available when inventory is open
  - Player inventory and the to-do list panel go on top of each other unless player moves the panel
- - Missing translations on "Add to To-Do"-button and "To-Do" panel title
+ - Missing translations on "Add to To-Do"-button, "Clear Crafting To-Do list"-button and "To-Do" panel title

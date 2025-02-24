@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 
 namespace ValheimModToDo
 {
@@ -230,10 +231,12 @@ namespace ValheimModToDo
         }
 
 
-        public void LoadFromFile()
+        public bool LoadFromFile()
         {
             var fileName = GetSaveFileName();
             Jotunn.Logger.LogInfo($"ToDoResources: LoadFromFile({fileName})");
+            if (fileName == null)
+                return false;
 
             if (File.Exists(fileName))
             {
@@ -259,8 +262,10 @@ namespace ValheimModToDo
                 catch (IOException e)
                 {
                     Jotunn.Logger.LogError($"ToDoResources: LoadFromFile({fileName}) exception:{e.Message}");
+                    return false;
                 }
             }
+            return true;
         }
 
 
@@ -329,8 +334,11 @@ namespace ValheimModToDo
         }
         public string GetSaveFileNameInValheim()
         {
-            var playerName = Player.m_localPlayer.GetPlayerName();
-            var mapName = "map";
+            var mapName = ZNet.instance?.GetWorldName();
+            var playerName = Player.m_localPlayer?.GetPlayerName();
+            Jotunn.Logger.LogInfo($"ToDoResources: GetFileName for [{playerName}] in [{mapName}])");
+            if (playerName == null)
+                return null;
             var fileName = $"todo-list-for-{playerName}-in-{mapName}-v1.xml";
             return Path.Combine(Application.persistentDataPath, fileName);
         }

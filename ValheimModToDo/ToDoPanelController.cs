@@ -12,8 +12,8 @@ namespace ValheimModToDo
 {
     internal class ToDoPanelController
     {
-        public GameObject ToDoPanel;
-        public GameObject ToDoTextView;
+        public GameObject ToDoEditPanel;
+        public GameObject ToDoTextView, ToDoTextEdit;
         public GameObject CleanAllButton;
 
         readonly float width = 250;
@@ -21,6 +21,8 @@ namespace ValheimModToDo
         readonly float margin = 10f;
         readonly float headerHeight = 50f;
         readonly float listHeight = 400f;
+
+        public ToDoResources todo;
 
         private bool IsGuiManagerReady()
         {
@@ -32,35 +34,77 @@ namespace ValheimModToDo
 
             if (!GUIManager.CustomGUIFront)
             {
-                Logger.LogError("GUIManager CustomGUI is null");
+                Logger.LogError("GUIManager CustomGUIFront is null");
+                return false;
+            }
+
+            if (!GUIManager.CustomGUIBack)
+            {
+                Logger.LogError("GUIManager CustomGUIBack is null");
                 return false;
             }
             return true;
         }
 
-        public GameObject CreatePanel(UnityAction onClearAllCraftingRecipes)
+        public void LogWorldName()
         {
-            Jotunn.Logger.LogInfo("Make new To-Do panel");
-            if (!IsGuiManagerReady())
-                return null;
+            Jotunn.Logger.LogInfo($"WorldName [{ZNet.instance?.GetWorldName()}]");
+        }
 
+        public void SetupUi(ToDoResources resources)
+        {
+            todo = resources;
+
+            Jotunn.Logger.LogInfo($"Make new To-Do panel");
+            if (!IsGuiManagerReady())
+                return;
+
+            if (ZNet.instance?.GetWorldName() == null)
+                return;
+
+            CreateViewModePanel();
+            CreateEditModePanel();
+
+            SaveFileLoaded = false;
+        }
+
+        public void CreateViewModePanel()
+        {
+            ToDoTextView = GUIManager.Instance.CreateText(
+                text: "Resources",
+                parent: GUIManager.CustomGUIBack.transform,
+                anchorMin: new Vector2(1f, 0.5f),
+                anchorMax: new Vector2(1f, 0.5f),
+                position: new Vector2(-width / 2, 0),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: width - 2 * margin,
+                height: listHeight,
+                addContentSizeFitter: false);
+            ToDoTextView.SetActive(false);
+        }
+
+        public void CreateEditModePanel()
+        {
             // Create the panel object
-            var panel = GUIManager.Instance.CreateWoodpanel(
+            ToDoEditPanel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,
                 anchorMin: new Vector2(1f, 0.5f),
                 anchorMax: new Vector2(1f, 0.5f),
-                position: new Vector2(-width/2, 0),
+                position: new Vector2(-width / 2, 0),
                 width: width,
                 height: height,
                 draggable: true);
-            panel.SetActive(false);
+            ToDoEditPanel.SetActive(false);
+            ToDoEditPanel.AddComponent<DragWindowCntrl>();
 
-            panel.AddComponent<DragWindowCntrl>();
-
-            // Create the text object
+            // Header for Edit Mode
             GUIManager.Instance.CreateText(
                 text: "To-Do",
-                parent: panel.transform,
+                parent: ToDoEditPanel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
                 position: new Vector2(0f, -headerHeight),
@@ -73,13 +117,12 @@ namespace ValheimModToDo
                 height: headerHeight,
                 addContentSizeFitter: false);
 
-            // Create the text object
-            ToDoTextView = GUIManager.Instance.CreateText(
+            ToDoTextEdit = GUIManager.Instance.CreateText(
                 text: "Resources",
-                parent: panel.transform,
+                parent: ToDoEditPanel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, -((listHeight + 2*headerHeight + 4*margin)*0.5f)),
+                position: new Vector2(0f, -((listHeight + 2 * headerHeight + 4 * margin) * 0.5f)),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
                 color: GUIManager.Instance.ValheimOrange,
@@ -89,65 +132,109 @@ namespace ValheimModToDo
                 height: listHeight,
                 addContentSizeFitter: false);
 
-            // Create the button object
             CleanAllButton = GUIManager.Instance.CreateButton(
                 text: "Clear All",
-                parent: panel.transform,
+                parent: ToDoEditPanel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
                 position: new Vector2(0, 40f),
                 width: 150f,
                 height: 40f);
-            CleanAllButton.SetActive(false);
+            CleanAllButton.SetActive(true);
 
             // Add a listener to the button to close the panel again
             Button button = CleanAllButton.GetComponent<Button>();
-            button?.onClick.AddListener(onClearAllCraftingRecipes);
-
-            ToDoPanel = panel;
-            return panel;
+            button?.onClick.AddListener(OnClearAllCraftingRecipes);
         }
 
-        public void SetActive(bool active)
+        private bool SaveFileLoaded = false;
+
+        public void EnsureFileLoaded()
         {
-            ToDoPanel?.SetActive(active);
-            if (!active)
-                SetEditMode(false);
+            if (SaveFileLoaded) return;
+            SaveFileLoaded = true;
+            todo.LoadFromFile();
+        }
+
+        public bool Visible = false;
+
+        public void ToggleVisibilty()
+        {
+            Visible = !Visible;
+            UpdateViewModes();
         }
 
         public bool EditMode = false;
 
-        public void SetEditMode(bool active)
+        public void ToggleEditMode()
         {
-            EditMode = active;
-            CleanAllButton?.SetActive(EditMode);
-            GUIManager.BlockInput(EditMode);
+            EditMode = !EditMode;
+            UpdateViewModes();
+        }
 
-            var textRect = ToDoTextView.GetComponent<RectTransform>();
-            var panelRect = ToDoPanel.GetComponent<RectTransform>();
-            if (textRect != null && panelRect != null)
+        public void UpdateViewModes()
+        {
+            if (Visible)
             {
-                if (EditMode)
-                {
-                    textRect.anchoredPosition = new Vector2(0f, -((listHeight + 2 * headerHeight + 4 * margin) * 0.5f));
-                    panelRect.anchoredPosition = new Vector2(-width/2, 0);
-                }
-                else
-                {
-                    textRect.anchoredPosition = new Vector2(-width, -((listHeight + 2 * headerHeight + 4 * margin) * 0.5f));
-                    panelRect.anchoredPosition = new Vector2(width/2, 0);
-                }
+                UpdateToDoPanel();
+                ToDoEditPanel.SetActive(EditMode);
+                ToDoTextView.SetActive(!EditMode);
+                GUIManager.BlockInput(EditMode);
+            }
+            else
+            {
+                ToDoEditPanel.SetActive(false);
+                ToDoTextView.SetActive(false);
+                GUIManager.BlockInput(false);
             }
         }
 
-        public void UpdateResources(ToDoResources todo, Inventory inventory)
+        public void UpdateToDoPanel()
         {
+            Jotunn.Logger.LogInfo("UpdateToDoPanel");
+            var inventory = Player.m_localPlayer?.GetInventory();
+            if (inventory != null)
+            {
+                EnsureFileLoaded();
+
+                UpdateResources(inventory);
+
+                if (InventoryGui.instance != null && InventoryGui.instance.IsContainerOpen())
+                {
+                    var container = InventoryGui.instance.m_currentContainer;
+                    if (container != null)
+                    {
+                        var containerInventory = container.GetInventory();
+                        if (containerInventory != null)
+                        {
+                            Jotunn.Logger.LogInfo($"Container: {container.name} [{container.m_name}] id [{container.GetInstanceID()}]");
+                            foreach (var item in containerInventory.m_inventory)
+                            {
+                                Jotunn.Logger.LogInfo($"  {item.m_shared.m_name} stack {item.m_stack} quality {item.m_quality}");
+                            }
+                        }
+                    }
+                }
+                if (todo.HasRecipeListChanged())
+                    todo.SaveToFile();
+            }
+            else
+            {
+                Jotunn.Logger.LogWarning("UpdateToDoPanel: No inventory");
+            }
+        }
+
+        public void UpdateResources(Inventory inventory)
+        {
+            var text = GetResourcesText(inventory);
+
             if (ToDoTextView != null)
             {
                 var textComponent = ToDoTextView.GetComponent<UnityEngine.UI.Text>();
                 if (textComponent != null)
                 {
-                    textComponent.text = GetResourcesText(todo, inventory);
+                    textComponent.text = text;
+                    Jotunn.Logger.LogInfo("UpdateResourcesText: View mode text updated");
                 }
                 else
                 {
@@ -158,9 +245,27 @@ namespace ValheimModToDo
             {
                 Jotunn.Logger.LogWarning("UpdateResourcesText: No text view");
             }
+
+            if (ToDoTextEdit != null)
+            {
+                var textComponent = ToDoTextEdit.GetComponent<UnityEngine.UI.Text>();
+                if (textComponent != null)
+                {
+                    textComponent.text = text;
+                    Jotunn.Logger.LogInfo("UpdateResourcesText: Edit mode text updated");
+                }
+                else
+                {
+                    Jotunn.Logger.LogError("UpdateResourcesText: No edit mode text component");
+                }
+            }
+            else
+            {
+                Jotunn.Logger.LogWarning("UpdateResourcesText: No edit mode text view");
+            }
         }
 
-        public string GetResourcesText(ToDoResources todo, Inventory inventory)
+        public string GetResourcesText(Inventory inventory)
         {
             Jotunn.Logger.LogInfo("ToDoPanelController.GetResourcesText");
             StringBuilder resourcesText = new("", 2048);
@@ -205,5 +310,45 @@ namespace ValheimModToDo
             Jotunn.Logger.LogInfo($"To-Do List:\n{text}");
             return text;
         }
+        private void OnClearAllCraftingRecipes()
+        {
+            todo.ClearRecipes();
+            UpdateToDoPanel();
+        }
+
+        public bool InventoryGuiOpen = false;
+
+        public void OnShowInventoryGui()
+        {
+            if (ToDoTextView != null)
+            {
+                if (InventoryGuiOpen == false)
+                {
+                    InventoryGuiOpen = true;
+                    // ToDoTextView.transform.Translate(-width, 0f, 0f);
+                    var rect = ToDoTextView.GetComponent<RectTransform>();
+                    rect.anchorMax = new Vector2(0.5f, 0.5f);
+                    rect.anchorMin = new Vector2(0.5f, 0.5f);
+                    rect.anchoredPosition = new Vector2(width / 2, 0);
+                }
+            }
+        }
+
+        public void OnHideInventoryGui()
+        {
+            if (ToDoTextView != null)
+            {
+                if (InventoryGuiOpen == true)
+                {
+                    InventoryGuiOpen = false;
+                    // ToDoTextView.transform.Translate(width, 0f, 0f);
+                    var rect = ToDoTextView.GetComponent<RectTransform>();
+                    rect.anchorMax = new Vector2(1f, 0.5f);
+                    rect.anchorMin = new Vector2(1f, 0.5f);
+                    rect.anchoredPosition = new Vector2(-width / 2, 0);
+                }
+            }
+        }
+
     }
 }
