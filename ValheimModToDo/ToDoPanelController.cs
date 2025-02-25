@@ -92,14 +92,13 @@ namespace ValheimModToDo
             // Create the panel object
             ToDoEditPanel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,
-                anchorMin: new Vector2(1f, 0.5f),
-                anchorMax: new Vector2(1f, 0.5f),
-                position: new Vector2(-width / 2, 0),
+                anchorMin: new Vector2(0.5f, 0.5f),
+                anchorMax: new Vector2(0.5f, 0.5f),
+                position: new Vector2(width / 2, 0),
                 width: width,
                 height: height,
-                draggable: true);
+                draggable: false);
             ToDoEditPanel.SetActive(false);
-            ToDoEditPanel.AddComponent<DragWindowCntrl>();
 
             // Header for Edit Mode
             GUIManager.Instance.CreateText(
@@ -164,28 +163,18 @@ namespace ValheimModToDo
             UpdateViewModes();
         }
 
-        public bool EditMode = false;
-
-        public void ToggleEditMode()
-        {
-            EditMode = !EditMode;
-            UpdateViewModes();
-        }
-
         public void UpdateViewModes()
         {
             if (Visible)
             {
                 UpdateToDoPanel();
-                ToDoEditPanel.SetActive(EditMode);
-                ToDoTextView.SetActive(!EditMode);
-                GUIManager.BlockInput(EditMode);
+                ToDoEditPanel.SetActive(InventoryGuiOpen);
+                ToDoTextView.SetActive(!InventoryGuiOpen);
             }
             else
             {
                 ToDoEditPanel.SetActive(false);
                 ToDoTextView.SetActive(false);
-                GUIManager.BlockInput(false);
             }
         }
 
@@ -320,35 +309,20 @@ namespace ValheimModToDo
 
         public void OnShowInventoryGui()
         {
-            if (ToDoTextView != null)
+            if (InventoryGuiOpen == false)
             {
-                if (InventoryGuiOpen == false)
-                {
-                    InventoryGuiOpen = true;
-                    // ToDoTextView.transform.Translate(-width, 0f, 0f);
-                    var rect = ToDoTextView.GetComponent<RectTransform>();
-                    rect.anchorMax = new Vector2(0.5f, 0.5f);
-                    rect.anchorMin = new Vector2(0.5f, 0.5f);
-                    rect.anchoredPosition = new Vector2(width / 2, 0);
-                }
+                InventoryGuiOpen = true;
+                UpdateViewModes();
             }
         }
 
         public void OnHideInventoryGui()
         {
-            if (ToDoTextView != null)
+            if (InventoryGuiOpen == true)
             {
-                if (InventoryGuiOpen == true)
-                {
-                    InventoryGuiOpen = false;
-                    // ToDoTextView.transform.Translate(width, 0f, 0f);
-                    var rect = ToDoTextView.GetComponent<RectTransform>();
-                    rect.anchorMax = new Vector2(1f, 0.5f);
-                    rect.anchorMin = new Vector2(1f, 0.5f);
-                    rect.anchoredPosition = new Vector2(-width / 2, 0);
-                }
+                InventoryGuiOpen = false;
+                UpdateViewModes();
             }
         }
-
     }
 }

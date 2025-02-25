@@ -18,7 +18,7 @@ namespace ValheimModToDo
     {
         public const string PluginGUID = "com.jotunn.ValheimModToDo";
         public const string PluginName = "ValheimModToDo";
-        public const string PluginVersion = "0.3.0";
+        public const string PluginVersion = "0.4.0";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -54,7 +54,6 @@ namespace ValheimModToDo
 
         private ButtonConfig ToggleVisibiltyButton;
         private ButtonConfig AddCraftToDoButton;
-        private ButtonConfig ToggleEditModeButton;
 
         private void AddInputs()
         {
@@ -74,14 +73,6 @@ namespace ValheimModToDo
                 ActiveInCustomGUI = true
             };
             InputManager.Instance.AddButton(PluginGUID, AddCraftToDoButton);
-
-            ToggleEditModeButton = new ButtonConfig
-            {
-                Name = "Toggle To-Do List Edit Mode",
-                Key = KeyCode.PageUp,
-                ActiveInCustomGUI = true
-            };
-            InputManager.Instance.AddButton(PluginGUID, ToggleEditModeButton);
         }
 
         private void Update()
@@ -95,10 +86,6 @@ namespace ValheimModToDo
                 if (ZInput.GetButtonDown(AddCraftToDoButton.Name))
                 {
                     AddCurrentSelectionToDoList();
-                }
-                if (ZInput.GetButtonDown(ToggleEditModeButton.Name))
-                {
-                    todoPanel.ToggleEditMode();
                 }
             }
         }
