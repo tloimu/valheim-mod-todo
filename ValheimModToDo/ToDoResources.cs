@@ -5,6 +5,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using Xunit.Sdk;
 
 namespace ValheimModToDo
 {
@@ -98,14 +99,21 @@ namespace ValheimModToDo
     {
         public Dictionary<string, List<ToDoRecipe>> recipes = new();
         public Dictionary<string, int> resources = new();
+        public string notes;
 
         private readonly object _recipeLock = new();
-        private bool hasRecipeListChanged = false;
+        private bool wasChangedSince= false;
 
-        public bool HasRecipeListChanged()
+        public void SetNotes(string notes)
         {
-            var wasChanged = hasRecipeListChanged;
-            hasRecipeListChanged = false;
+            this.notes = notes;
+            wasChangedSince = true;
+        }
+
+        public bool WasChangedSince()
+        {
+            var wasChanged = wasChangedSince;
+            wasChangedSince = false;
             return wasChanged;
         }
 
@@ -154,7 +162,7 @@ namespace ValheimModToDo
                         Jotunn.Logger.LogInfo($"ToDoResources: Added Resource {resource.id} amount {amount} now need {resources[resource.id]}");
                     }
                 }
-                hasRecipeListChanged = true;
+                wasChangedSince = true;
             }
         }
 
@@ -193,7 +201,7 @@ namespace ValheimModToDo
                     foundRecipes.RemoveAt(0);
                     if (foundRecipes.Count == 0)
                         recipes.Remove(recipeKey);
-                    hasRecipeListChanged = true;
+                    wasChangedSince = true;
                 }
             }
         }
@@ -256,6 +264,7 @@ namespace ValheimModToDo
                             else
                                 AddSavedRecipeInValheim(saveRecipe.id, saveRecipe.quality);
                         }
+                        notes = saveRecipes.notes;
                         fs.Close();
                     }
                 }
@@ -311,6 +320,7 @@ namespace ValheimModToDo
                     saveRecipes.recipes.Add(saveRecipe);
                 }
             }
+            saveRecipes.notes = notes;
             var serializer = new XmlSerializer(typeof(RecipesList));
             TextWriter writer = new StreamWriter(fileName);
             serializer.Serialize(writer, saveRecipes);
@@ -351,6 +361,7 @@ namespace ValheimModToDo
         [XmlAttribute]
         public string version = "1";
         public List<recipe> recipes = new();
+        public string notes;
     }
 
     public class recipe

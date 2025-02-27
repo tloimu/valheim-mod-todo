@@ -18,7 +18,7 @@ namespace ValheimModToDo
     {
         public const string PluginGUID = "com.jotunn.ValheimModToDo";
         public const string PluginName = "ValheimModToDo";
-        public const string PluginVersion = "0.4.1";
+        public const string PluginVersion = "0.5.0";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html

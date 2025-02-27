@@ -7,18 +7,20 @@ using System.Text;
 using UnityEngine.Events;
 
 using Logger = Jotunn.Logger;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ValheimModToDo
 {
     internal class ToDoPanelController
     {
         public GameObject ToDoEditPanel;
-        public GameObject ToDoTextView, ToDoTextEdit;
+        public GameObject ToDoTextView, ToDoTextEdit, ToDoTextNotes;
         public GameObject CleanAllButton;
 
         readonly float width = 250;
         readonly float height = 600;
         readonly float margin = 10f;
+        readonly float notesHeight = 60f;
         readonly float headerHeight = 50f;
         readonly float listHeight = 400f;
 
@@ -116,12 +118,21 @@ namespace ValheimModToDo
                 height: headerHeight,
                 addContentSizeFitter: false);
 
+            ToDoTextNotes = GUIManager.Instance.CreateInputField(
+                parent: ToDoEditPanel.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(0f, -(notesHeight + 2 * headerHeight + 4 * margin) * 0.5f),
+                width: width - 2*margin,
+                height: notesHeight
+                );
+
             ToDoTextEdit = GUIManager.Instance.CreateText(
                 text: "Resources",
                 parent: ToDoEditPanel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, -((listHeight + 2 * headerHeight + 4 * margin) * 0.5f)),
+                position: new Vector2(0f, -((listHeight + 2 * notesHeight + 2 * headerHeight + 6 * margin) * 0.5f)),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
                 color: GUIManager.Instance.ValheimOrange,
@@ -153,6 +164,7 @@ namespace ValheimModToDo
             if (SaveFileLoaded) return;
             SaveFileLoaded = true;
             todo.LoadFromFile();
+            SetToDoNotesToUi();
         }
 
         public bool Visible = false;
@@ -218,7 +230,8 @@ namespace ValheimModToDo
                         }
                     }
                 }
-                if (todo.HasRecipeListChanged())
+
+                if (todo.WasChangedSince())
                     todo.SaveToFile();
             }
             else
@@ -229,10 +242,9 @@ namespace ValheimModToDo
 
         public void UpdateResources(Inventory inventory)
         {
-            var text = GetResourcesText(inventory);
-
             if (ToDoTextView != null)
             {
+                var text = GetResourcesText(inventory);
                 var textComponent = ToDoTextView.GetComponent<UnityEngine.UI.Text>();
                 if (textComponent != null)
                 {
@@ -251,6 +263,7 @@ namespace ValheimModToDo
 
             if (ToDoTextEdit != null)
             {
+                var text = GetResourcesText(inventory, false);
                 var textComponent = ToDoTextEdit.GetComponent<UnityEngine.UI.Text>();
                 if (textComponent != null)
                 {
@@ -268,10 +281,16 @@ namespace ValheimModToDo
             }
         }
 
-        public string GetResourcesText(Inventory inventory)
+        public string GetResourcesText(Inventory inventory, bool includeNotes = true)
         {
             Jotunn.Logger.LogInfo("ToDoPanelController.GetResourcesText");
             StringBuilder resourcesText = new("", 2048);
+
+            if (includeNotes && todo.notes != null && todo.notes.Length > 0)
+            {
+                resourcesText.AppendLine(todo.notes);
+                resourcesText.AppendLine();
+            }
 
             if (todo.recipes.Count() > 0 || todo.resources.Count() > 0)
             {
@@ -281,6 +300,8 @@ namespace ValheimModToDo
                     if (res.Value > 0)
                     {
                         var id = $"$item_{res.Key.ToLower()}";
+                        if (res.Key.StartsWith("$item_")) // Some Keys already have $item_ in them as most do not
+                            id = res.Key;
                         var name = Localization.instance.Localize(id);
                         var hasInInventory = inventory.CountItems(id);
                         string line;
@@ -293,7 +314,7 @@ namespace ValheimModToDo
                     }
                 }
 
-                resourcesText.AppendLine("\n\n");
+                resourcesText.AppendLine();
                 resourcesText.AppendLine(Localization.instance.Localize("$inventory_recipes:"));
                 foreach (var rec in todo.recipes)
                 {
@@ -335,7 +356,40 @@ namespace ValheimModToDo
             if (InventoryGuiOpen == true)
             {
                 InventoryGuiOpen = false;
+                GetToDoNotesFromUi();
                 UpdateViewModes();
+            }
+        }
+
+        public void GetToDoNotesFromUi()
+        {
+            if (ToDoTextNotes != null)
+            {
+                var input = ToDoTextNotes.GetComponent<InputField>();
+                if (input != null && input.textComponent is UnityEngine.UI.Text text)
+                {
+                    todo.SetNotes(input.text);
+                }
+                else
+                {
+                    Jotunn.Logger.LogError("GetToDoNotesFromUi: No ToDoTextNotes text component");
+                }
+            }
+        }
+
+        public void SetToDoNotesToUi()
+        {
+            if (ToDoTextNotes != null)
+            {
+                var input = ToDoTextNotes.GetComponent<InputField>();
+                if (input != null && input.textComponent is UnityEngine.UI.Text text)
+                {
+                    input.text = todo.notes;
+                }
+                else
+                {
+                    Jotunn.Logger.LogError("SetToDoNotesToUi: No ToDoTextNotes text component");
+                }
             }
         }
     }
