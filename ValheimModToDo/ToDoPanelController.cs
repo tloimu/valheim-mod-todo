@@ -15,7 +15,7 @@ namespace ValheimModToDo
     {
         public GameObject ToDoEditPanel;
         public GameObject ToDoTextView, ToDoTextEdit, ToDoTextNotes;
-        public GameObject CleanAllButton;
+        public GameObject ClearAllButton;
 
         readonly float width = 250;
         readonly float height = 600;
@@ -126,9 +126,11 @@ namespace ValheimModToDo
                 width: width - 2*margin,
                 height: notesHeight
                 );
+            var inputComponent = ToDoTextNotes.GetComponent<InputField>();
+            inputComponent.lineType = InputField.LineType.MultiLineNewline;
 
             ToDoTextEdit = GUIManager.Instance.CreateText(
-                text: "Resources",
+                text: "",
                 parent: ToDoEditPanel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
@@ -142,7 +144,7 @@ namespace ValheimModToDo
                 height: listHeight,
                 addContentSizeFitter: false);
 
-            CleanAllButton = GUIManager.Instance.CreateButton(
+            ClearAllButton = GUIManager.Instance.CreateButton(
                 text: "Clear All",
                 parent: ToDoEditPanel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
@@ -150,10 +152,9 @@ namespace ValheimModToDo
                 position: new Vector2(0, 40f),
                 width: 150f,
                 height: 40f);
-            CleanAllButton.SetActive(true);
+            ClearAllButton.SetActive(true);
 
-            // Add a listener to the button to close the panel again
-            Button button = CleanAllButton.GetComponent<Button>();
+            Button button = ClearAllButton.GetComponent<Button>();
             button?.onClick.AddListener(OnClearAllCraftingRecipes);
         }
 

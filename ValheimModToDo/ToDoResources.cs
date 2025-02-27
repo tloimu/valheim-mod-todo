@@ -99,15 +99,21 @@ namespace ValheimModToDo
     {
         public Dictionary<string, List<ToDoRecipe>> recipes = new();
         public Dictionary<string, int> resources = new();
-        public string notes;
+        public string notes = "";
 
         private readonly object _recipeLock = new();
         private bool wasChangedSince= false;
 
         public void SetNotes(string notes)
         {
-            this.notes = notes;
-            wasChangedSince = true;
+            if (notes == null)
+                notes = "";
+
+            if (!this.notes.Equals(notes))
+            {
+                this.notes = notes;
+                wasChangedSince = true;
+            }
         }
 
         public bool WasChangedSince()
