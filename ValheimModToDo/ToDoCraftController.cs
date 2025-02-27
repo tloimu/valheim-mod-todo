@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -35,11 +30,8 @@ namespace ValheimModToDo
 
             InventoryPanelPos = InventoryGui.instance?.gameObject?.GetComponent<RectTransform>();
 
-            Jotunn.Logger.LogDebug("Instantiate");
             goAddCraftToDo = Instantiate(craftButton);
-            Jotunn.Logger.LogDebug("SetParent");
             goAddCraftToDo.transform.SetParent(craftButton.transform.parent, false);
-            Jotunn.Logger.LogDebug("SetName");
             goAddCraftToDo.name = "craftAddToDoButton";
 
             var position = goAddCraftToDo.transform.position;
@@ -65,7 +57,6 @@ namespace ValheimModToDo
                 txtAddCraftToDo.fontSize = 16;
             }
 
-            Jotunn.Logger.LogDebug("set tooltip");
             goAddCraftToDo.GetComponent<UITooltip>().m_text = "";
         }
     }

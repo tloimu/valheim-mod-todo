@@ -11,21 +11,26 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
 
 # To-Do
 
+Prio:
+
+ - Add "Show To-Do List" button to Inventory?
+ - If adding item to list and the list is hidden -> make it automatically visible?
+
+Next:
+
  - Tabular lists in resources and recipes
  - Add way to remove and add recipes and their amounts from/in the list (in Edit Mode)
+ - Add way to "Include Container Items"-mode option when showing needed resources (Requires: Container Tracking)
  - Add free text notes
- - Edit Mode: `<PgUp>` to toggle mode -> Open to-do view in Edit Mode (block input, show buttons and edit boxes etc.)
+ - Edit Mode:
 	+ show and allow pressing Clear All, Edit Notes, Remove Recipe etc.
- 	+ "Hide Panel but show Background Text"-mode option (use Custom Background GUI)
 	+ Select, add, edit and delete from preset of recipes (Requires: Presets)
- 	+ "Include Container Items"-mode option (Requires: Container Tracking)
  - Add crafting recipe with Insert-key
  - Allow making recipe presets (e.g. Ahjo + Työpöytä + ...)
  - Allow tracking a container (e.g. ship) inventory instead of just player inventory (filling a ship with proper set of items)
  - Configuration options:
-	+ show todo list as just floating text vs. wood panel
 	+ Keybindings
-	+ Panel Location / Follow Inventory
+ - Translations to texts not in game already
 
 
 # Background Material

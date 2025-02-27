@@ -19,7 +19,6 @@ namespace ValheimModToDo.Patches
         {
             if (Player.m_localPlayer != null && !Player.m_localPlayer.m_isLoading)
             {
-                Jotunn.Logger.LogInfo($"Inventory.Changed: name {__instance.m_name}");
                 if (Player.m_localPlayer.m_inventory == __instance)
                     ValheimModToDo.OnInventoryChanged();
             }

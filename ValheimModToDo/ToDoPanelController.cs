@@ -165,6 +165,13 @@ namespace ValheimModToDo
 
         public void UpdateViewModes()
         {
+            if (ToDoEditPanel == null || ToDoTextView == null)
+            {
+                if (todo != null)
+                    SetupUi(todo);
+                return;
+            }
+
             if (Visible)
             {
                 UpdateToDoPanel();
@@ -184,6 +191,13 @@ namespace ValheimModToDo
             var inventory = Player.m_localPlayer?.GetInventory();
             if (inventory != null)
             {
+                if (ToDoEditPanel == null || ToDoTextView == null)
+                {
+                    if (todo != null)
+                        SetupUi(todo);
+                    return;
+                }
+
                 EnsureFileLoaded();
 
                 UpdateResources(inventory);
