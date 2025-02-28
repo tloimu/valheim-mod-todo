@@ -298,19 +298,16 @@ namespace ValheimModToDo
                 resourcesText.AppendLine(Localization.instance.Localize("$menu_resources:"));
                 foreach (var res in todo.resources)
                 {
-                    if (res.Value > 0)
+                    if (res.Value.count > 0)
                     {
-                        var id = $"$item_{res.Key.ToLower()}";
-                        if (res.Key.StartsWith("$item_")) // Some Keys already have $item_ in them as most do not
-                            id = res.Key;
-                        var name = Localization.instance.Localize(id);
-                        var hasInInventory = inventory.CountItems(id);
+                        var name = res.Value.item.name;
+                        var hasInInventory = inventory.CountItems(res.Value.item.id);
                         string line;
-                        if (hasInInventory < res.Value)
-                            line = $"  {name}\t[{hasInInventory} / {res.Value}]";
+                        if (hasInInventory < res.Value.count)
+                            line = $"  {name}\t[{hasInInventory} / {res.Value.count}]";
                         else
-                            line = $"  {name}\t[{res.Value}]";
-                        Jotunn.Logger.LogInfo(line);
+                            line = $"  {name}\t[{res.Value.count}]";
+                        Jotunn.Logger.LogInfo($"{line} from key [{res.Key}] id [{res.Value.item.id}] name [{res.Value.item.name}]");
                         resourcesText.AppendLine(line);
                     }
                 }
@@ -333,6 +330,11 @@ namespace ValheimModToDo
             var text = resourcesText.ToString();
 
             Jotunn.Logger.LogInfo($"To-Do List:\n{text}");
+            Jotunn.Logger.LogInfo($"Inventory:");
+            foreach (var item in inventory.m_inventory)
+            {
+                Jotunn.Logger.LogInfo($"  - [{item.m_shared.m_name}]");
+            }
             return text;
         }
         private void OnClearAllCraftingRecipes()

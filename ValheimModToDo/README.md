@@ -11,13 +11,13 @@ Shoutout to game Satisfactory for inspirations.
 
 Show/hide the *To-Do List* pressing `<Home>` key. Toggling the panel to visible will also force update it in case something is not in sync with your inventory and the to-do list panel.
 
-Add the selected crafting recipe to the list from crafting panel by pressing `<Insert>` key or by clicking the new **Add to To-Do** button. This works also for item upgrades.
+Add the selected crafting recipe to the list from the inventory UI by clicking the new **Add to To-Do** button or by pressing `<Insert>` key. This works also for item upgrades.
 
 Add the building recipe to the list by pressing `<Insert>` key while placing a building piece.
 
 The To-Do List is swiched to *Edit Mode* when player inventory is open. In Edit Mode, you can edit the To-Do List in more detail in the separate panel that appears.
 
-Clear the list by clicking the **Clear Crafting To-Do list** button on the To-Do List panel when in Edit Mode.
+Clear the list from recipies by clicking the **Clear All** button on the To-Do List panel when in Edit Mode.
 
 The needed amount of resources is automatically updated when you:
 
@@ -28,6 +28,8 @@ The needed amount of resources is automatically updated when you:
  - respawn
 
 Completing crafting or building an recipe item on the list will also automatically remove it from the list.
+
+There is also a free text notes field than can be edited in Edit Mode.
 
 The To-Do List is stored in a file `todo-list-for-{PlayerName}-in-{WorldName}-v1.xml` in Valheim's data folder.
 

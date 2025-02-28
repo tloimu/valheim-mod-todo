@@ -14,6 +14,7 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
 Prio:
 
  - Add "Show To-Do List" button to Inventory?
+ - Add "Hide To-Do List" toggle in Edit Mode
  - If adding item to list and the list is hidden -> make it automatically visible?
 
 Next:

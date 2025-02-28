@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using Xunit.Sdk;
+using JetBrains.Annotations;
 
 namespace ValheimModToDo
 {
@@ -24,9 +25,38 @@ namespace ValheimModToDo
 
         public ToDoResource(Piece.Requirement req, int quality)
         {
-            id = req.m_resItem.name;
-            name = Localization.instance.Localize(id);
+            id = req.m_resItem?.m_itemData?.m_shared?.m_name;
+            name = TranslateRequiredItem(req);
             amount = req.GetAmount(quality);
+        }
+
+        static public string TranslateRequiredItem(Piece.Requirement req)
+        {
+            var id = req.m_resItem.name;
+            string name;
+            if (req.m_resItem?.m_itemData?.m_shared?.m_name != null)
+            {
+                name = Localization.instance.Localize(req.m_resItem.m_itemData.m_shared.m_name);
+            }
+            else
+            {
+                id = $"item_{req.m_resItem.name.ToLower()}";
+                var tryName = $"${id}";
+                Jotunn.Logger.LogWarning($"Suspicious resource name: [{req.m_resItem.name}] trying [{tryName}]");
+                name = Localization.instance.Localize(tryName);
+            }
+
+            if (name.Contains("_") || name.Equals(id))
+            {
+                if (req.m_resItem?.m_itemData?.m_shared?.m_name != null)
+                {
+                    Jotunn.Logger.LogWarning($"Suspicious resource name: [{id}] m_item shared name [{req.m_resItem.m_itemData.m_shared.m_name}]");
+                    name = Localization.instance.Localize(req.m_resItem.m_itemData.m_shared.m_name);
+                }
+                else
+                    Jotunn.Logger.LogWarning($"Suspicious resource name: [{id}]");
+            }
+            return name;
         }
     }
 
@@ -60,6 +90,8 @@ namespace ValheimModToDo
             id = recipe.name;
             this.quality = quality;
             name = Localization.instance.Localize(recipe.m_item.m_itemData.m_shared.m_name);
+            if (name.Contains("_"))
+                Jotunn.Logger.LogWarning($"Suspicious item name: [{recipe.m_item.m_itemData.m_shared.m_name}] setName [{recipe.m_item.m_itemData.m_shared.m_setName}] m_item.name [{recipe.m_item.name}]");
             if (recipe.m_item != null && recipe.m_item.m_piece != null)
             {
                 foreach (var resource in recipe.m_item.m_piece.m_resources)
@@ -97,8 +129,15 @@ namespace ValheimModToDo
 
     public class ToDoResources
     {
+        public class ResourceRequirement
+        {
+            public ResourceRequirement(ToDoResource resource, int count) { item = resource; this.count = count; }
+            public ToDoResource item;
+            public int count;
+        }
+
         public Dictionary<string, List<ToDoRecipe>> recipes = new();
-        public Dictionary<string, int> resources = new();
+        public Dictionary<string, ResourceRequirement> resources = new();
         public string notes = "";
 
         private readonly object _recipeLock = new();
@@ -161,11 +200,11 @@ namespace ValheimModToDo
                 {
                     if (resource.amount > 0)
                     {
-                        if (resources.TryGetValue(resource.id, out var amount))
-                            resources[resource.id] = amount + resource.amount;
+                        if (resources.TryGetValue(resource.id, out var requirement))
+                            requirement.count += resource.amount;
                         else
-                            resources[resource.id] = resource.amount;
-                        Jotunn.Logger.LogInfo($"ToDoResources: Added Resource {resource.id} amount {amount} now need {resources[resource.id]}");
+                            resources[resource.id] = new ResourceRequirement(resource, resource.amount);
+                        Jotunn.Logger.LogInfo($"ToDoResources: Added Resource {resource.id} amount {resource.amount} now need {resources[resource.id].count}");
                     }
                 }
                 wasChangedSince = true;
@@ -192,15 +231,15 @@ namespace ValheimModToDo
                     var recipe = foundRecipes.First();
                     foreach (var resource in recipe.resources)
                     {
-                        if (resources.TryGetValue(resource.id, out var amount))
+                        if (resources.TryGetValue(resource.id, out var requirement))
                         {
-                            var remaining = amount - resource.amount;
+                            var remaining = requirement.count - resource.amount;
                             if (remaining > 0)
-                                resources[resource.id] = remaining;
+                                requirement.count = remaining;
                             else
                                 resources.Remove(resource.id);
 
-                            Jotunn.Logger.LogInfo($"ToDoResources: Removed Resource {resource.id} amount {amount} - left {remaining}");
+                            Jotunn.Logger.LogInfo($"ToDoResources: Removed Resource {resource.id} amount {resource.amount} - left {remaining}");
                         }
                     }
 
@@ -229,16 +268,22 @@ namespace ValheimModToDo
 
         public Piece FindPiece(string name)
         {
-            if (Player.m_localPlayer != null)
+            Jotunn.Logger.LogInfo($"FindPiece: {name}");
+            if (Player.m_localPlayer?.m_buildPieces?.m_availablePieces != null)
             {
                 foreach (var pl in Player.m_localPlayer.m_buildPieces.m_availablePieces)
                 {
                     foreach (var p in pl)
                     {
+                        Jotunn.Logger.LogInfo($"  - is it [{p.name}]?");
                         if (p.name == name)
                             return p;
                     }
                 }
+            }
+            else
+            {
+                Jotunn.Logger.LogError("FindPiece: No Available Pieces");
             }
 
             return null;
