@@ -2,6 +2,7 @@
 
 | Version | Notes                                                           |
 | ------- | --------------------------------------------------------------- |
+| 0.5.1   | Fixes costs and output of crafting multiple items at once. |
 | 0.5.0   | Added free text notes. Resource translation fixes. |
 | 0.4.1   | Fixes bug that prevented showing the To-Do List UI |
 | 0.4.0   | Counts item upgrade cost correctly. Save files are now also map specific. No longer overlaps with inventory UI. More robust UI design and interaction with inventory UI. |

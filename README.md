@@ -19,6 +19,7 @@ Prio:
 
 Next:
 
+ - When Skills-list open -> Hide To-Do List temporarily
  - Tabular lists in resources and recipes
  - Add way to remove and add recipes and their amounts from/in the list (in Edit Mode)
  - Add way to "Include Container Items"-mode option when showing needed resources (Requires: Container Tracking)

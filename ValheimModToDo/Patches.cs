@@ -32,13 +32,15 @@ namespace ValheimModToDo.Patches
         {
             if (player != Player.m_localPlayer)
                 return;
-            var recipe = __instance.m_selectedRecipe.Recipe;
-            var craftUpgradeItem = __instance.m_craftUpgradeItem;
+            var gui = __instance;
+            var recipe = gui.m_selectedRecipe.Recipe;
+            var craftUpgradeItem = gui.m_craftUpgradeItem;
             var qualityLevel = (craftUpgradeItem == null) ? 1 : (craftUpgradeItem.m_quality + 1);
             if (recipe)
             {
-                Jotunn.Logger.LogInfo($"InventoryGui.DoCrafting({recipe.name})");
-                ValheimModToDo.OnRemoveCraftToDo(recipe, qualityLevel);
+                int itemCount = gui.m_multiCrafting ? gui.m_multiCraftAmount : 1;
+                Jotunn.Logger.LogInfo($"InventoryGui.DoCrafting({recipe.name}) x {itemCount}");
+                ValheimModToDo.OnRemoveCraftToDo(recipe, qualityLevel, itemCount);
             }
         }
     }

@@ -18,7 +18,7 @@ namespace ValheimModToDo
     {
         public const string PluginGUID = "com.jotunn.ValheimModToDo";
         public const string PluginName = "ValheimModToDo";
-        public const string PluginVersion = "0.5.0";
+        public const string PluginVersion = "0.5.1";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -119,23 +119,25 @@ namespace ValheimModToDo
             var selectedRecipe = gui.m_selectedRecipe;
             var selectedVariant = gui.m_selectedVariant;
             int qualityLevel = 1;
+            var multiCrafting = gui.m_craftUpgradeItem == null && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyLStick"));
             if (gui.InUpradeTab())
             {
-                qualityLevel = 2;
+                qualityLevel = ((gui.m_craftUpgradeItem == null) ? 1 : (gui.m_craftUpgradeItem.m_quality + 1));
             }
             Jotunn.Logger.LogInfo($"m_selectedRecipe={selectedRecipe.Recipe}");
             Jotunn.Logger.LogInfo($"m_selectedVariant={selectedVariant}");
             Jotunn.Logger.LogInfo($"m_craftRecipe.m_craftingStation={selectedRecipe.Recipe?.m_craftingStation}");
             Jotunn.Logger.LogInfo($"qualityLevel={qualityLevel}");
             var recipe = selectedRecipe.Recipe;
+            int itemCount = multiCrafting ? gui.m_multiCraftAmount : 1;
             if (_instance != null)
-                _instance.AddCraftToDo(recipe, qualityLevel);
+                _instance.AddCraftToDo(recipe, qualityLevel, itemCount);
         }
 
-        public static void OnRemoveCraftToDo(Recipe recipe, int quality = 1)
+        public static void OnRemoveCraftToDo(Recipe recipe, int quality = 1, int count = 1)
         {
             if (_instance != null)
-                _instance.RemoveCraftToDo(recipe, quality);
+                _instance.RemoveCraftToDo(recipe, quality, count);
         }
 
         public static void OnRemoveCraftToDo(Piece piece, int quality = 1)
@@ -161,17 +163,19 @@ namespace ValheimModToDo
                 _instance.todoPanel.OnHideInventoryGui();
         }
 
-        private void AddCraftToDo(Recipe recipe, int quality)
+        private void AddCraftToDo(Recipe recipe, int quality, int count = 1)
         {
             Jotunn.Logger.LogInfo($"Add Craft To-Do: {recipe.name} amount {recipe.m_amount} quality {quality}");
-            todoResources.AddRecipe(recipe, quality);
+            for (int i = 0; i < count; i++)
+                todoResources.AddRecipe(recipe, quality);
             UpdateToDoPanel();
         }
 
-        private void RemoveCraftToDo(Recipe recipe, int quality)
+        private void RemoveCraftToDo(Recipe recipe, int quality, int count = 1)
         {
             Jotunn.Logger.LogInfo($"Remove Craft To-Do: {recipe.name} quality {quality}");
-            todoResources.RemoveRecipe(recipe, quality);
+            for (int i = 0; i < count; i++)
+                todoResources.RemoveRecipe(recipe, quality);
             UpdateToDoPanel();
         }
 

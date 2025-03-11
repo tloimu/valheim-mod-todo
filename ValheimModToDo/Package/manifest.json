@@ -1,7 +1,7 @@
 ﻿{
   "name": "ToDoList",
   "description": "Adds a dynamic To-Do List for tracking the needed resources for crafting and building the listed recipes",
-  "version_number": "0.5.0",
+  "version_number": "0.5.1",
   "website_url": "",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2202",
