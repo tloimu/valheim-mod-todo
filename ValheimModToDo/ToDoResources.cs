@@ -123,7 +123,7 @@ namespace ValheimModToDo
             if (quality == 1)
                 return name;
             else
-                return $"{name}/upgrade";
+                return $"{name}/{quality}";
         }
     }
 
