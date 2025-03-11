@@ -114,24 +114,27 @@ namespace ValheimModToDo
         public static void OnClickAddCraftItemButton()
         {
             Jotunn.Logger.LogInfo("OnClickAddCraftItemButton");
-
             var gui = InventoryGui.instance;
             var selectedRecipe = gui.m_selectedRecipe;
             var selectedVariant = gui.m_selectedVariant;
             int qualityLevel = 1;
-            var multiCrafting = gui.m_craftUpgradeItem == null && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyLStick"));
+            bool multiCrafting = false;
             if (gui.InUpradeTab())
             {
-                qualityLevel = ((gui.m_craftUpgradeItem == null) ? 1 : (gui.m_craftUpgradeItem.m_quality + 1));
+                var upgradeItem = selectedRecipe.ItemData;
+                qualityLevel = ((upgradeItem == null) ? 1 : (upgradeItem.m_quality + 1));
+            }
+            else
+            {
+                multiCrafting = gui.m_craftUpgradeItem == null && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyLStick"));
             }
             Jotunn.Logger.LogInfo($"m_selectedRecipe={selectedRecipe.Recipe}");
             Jotunn.Logger.LogInfo($"m_selectedVariant={selectedVariant}");
             Jotunn.Logger.LogInfo($"m_craftRecipe.m_craftingStation={selectedRecipe.Recipe?.m_craftingStation}");
             Jotunn.Logger.LogInfo($"qualityLevel={qualityLevel}");
-            var recipe = selectedRecipe.Recipe;
             int itemCount = multiCrafting ? gui.m_multiCraftAmount : 1;
             if (_instance != null)
-                _instance.AddCraftToDo(recipe, qualityLevel, itemCount);
+                _instance.AddCraftToDo(selectedRecipe.Recipe, qualityLevel, itemCount);
         }
 
         public static void OnRemoveCraftToDo(Recipe recipe, int quality = 1, int count = 1)

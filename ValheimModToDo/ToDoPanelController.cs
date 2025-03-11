@@ -26,6 +26,8 @@ namespace ValheimModToDo
 
         public ToDoResources todo;
 
+        public bool gLogVerbose = false;
+
         private bool IsGuiManagerReady()
         {
             if (GUIManager.Instance == null)
@@ -307,7 +309,8 @@ namespace ValheimModToDo
                             line = $"  {name}\t[{hasInInventory} / {res.Value.count}]";
                         else
                             line = $"  {name}\t[{res.Value.count}]";
-                        Jotunn.Logger.LogInfo($"{line} from key [{res.Key}] id [{res.Value.item.id}] name [{res.Value.item.name}]");
+                        if (gLogVerbose)
+                                Jotunn.Logger.LogInfo($"{line} from key [{res.Key}] id [{res.Value.item.id}] name [{res.Value.item.name}]");
                         resourcesText.AppendLine(line);
                     }
                 }
@@ -321,7 +324,7 @@ namespace ValheimModToDo
                         var recipe = rec.Value[0];
                         string is_upgrade = "";
                         if (recipe.quality > 1)
-                            is_upgrade = Localization.instance.Localize(" ($piece_upgrade)");
+                            is_upgrade = Localization.instance.Localize($" ($piece_upgrade {recipe.quality})");
                         resourcesText.AppendLine($"  {recipe.name}{is_upgrade}\t[{rec.Value.Count()}]");
                     }
                 }
@@ -329,11 +332,14 @@ namespace ValheimModToDo
 
             var text = resourcesText.ToString();
 
-            Jotunn.Logger.LogInfo($"To-Do List:\n{text}");
-            Jotunn.Logger.LogInfo($"Inventory:");
-            foreach (var item in inventory.m_inventory)
+            if (gLogVerbose)
             {
-                Jotunn.Logger.LogInfo($"  - [{item.m_shared.m_name}]");
+                Jotunn.Logger.LogInfo($"To-Do List:\n{text}");
+                Jotunn.Logger.LogInfo($"Inventory:");
+                foreach (var item in inventory.m_inventory)
+                {
+                    Jotunn.Logger.LogInfo($"  - [{item.m_shared.m_name}]");
+                }
             }
             return text;
         }
