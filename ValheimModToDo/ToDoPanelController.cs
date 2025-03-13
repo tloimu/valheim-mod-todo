@@ -324,7 +324,7 @@ namespace ValheimModToDo
                         var recipe = rec.Value[0];
                         string is_upgrade = "";
                         if (recipe.quality > 1)
-                            is_upgrade = Localization.instance.Localize($" ($piece_upgrade {recipe.quality})");
+                            is_upgrade = Localization.instance.Localize($" ⇧{recipe.quality}");
                         resourcesText.AppendLine($"  {recipe.name}{is_upgrade}\t[{rec.Value.Count()}]");
                     }
                 }
