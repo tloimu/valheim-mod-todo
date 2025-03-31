@@ -211,6 +211,20 @@ namespace ValheimModToDo
             }
         }
 
+        public void AddExistingRecipe(string recipeKey)
+        {
+            Jotunn.Logger.LogInfo($"ToDoResources: AddExistingRecipe({recipeKey})");
+            lock (_recipeLock)
+            {
+                if (recipes.TryGetValue(recipeKey, out var foundRecipes))
+                {
+                    var recipe = foundRecipes.First();
+                    AddRecipe(recipe);
+                    return;
+                }
+            }
+        }
+
         public void RemoveRecipe(Recipe recipe, int quality)
         {
             RemoveRecipe(ToDoRecipe.GetRecipeKey(recipe, quality));

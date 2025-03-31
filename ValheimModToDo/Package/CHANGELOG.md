@@ -2,7 +2,7 @@
 
 | Version | Notes                                                           |
 | ------- | --------------------------------------------------------------- |
-| 0.6.0   | Display improvements |
+| 0.6.0   | Allow editing recipe counts when inventory is open. Makes To-Do List automatically visible when adding new crafting or build items. Fixed keypresses going to the game when typing the notes text. Columnar view of recipes and resources. More compact way to indicate an upgrade recipe. |
 | 0.5.2   | Maintenance patch due Jotunn update |
 | 0.5.1   | Fixes costs and output of crafting multiple items at once. Fixed upgrade costs and display. |
 | 0.5.0   | Added free text notes. Resource translation fixes. |

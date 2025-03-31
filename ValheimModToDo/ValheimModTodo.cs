@@ -9,6 +9,7 @@ using System.Reflection;
 
 using Logger = Jotunn.Logger;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace ValheimModToDo
 {
@@ -26,8 +27,6 @@ namespace ValheimModToDo
 
         private static ValheimModToDo _instance;
 
-        private readonly ToDoResources todoResources = new();
-
         private readonly ToDoPanelController todoPanel = new();
 
         private void Awake()
@@ -41,8 +40,8 @@ namespace ValheimModToDo
 
         public void OnRebuildUi()
         {
-            Jotunn.Logger.LogInfo($"OnRebuildUi [{this.GetInstanceID()}]");
-            todoPanel.SetupUi(todoResources);
+            Jotunn.Logger.LogInfo("OnRebuildUi");
+            todoPanel.SetupUi();
         }
 
         private void OnDestroy()
@@ -87,6 +86,11 @@ namespace ValheimModToDo
                 {
                     AddCurrentSelectionToDoList();
                 }
+
+                if (todoPanel != null)
+                {
+                    todoPanel.CheckTextInput();
+                }
             }
         }
 
@@ -101,7 +105,8 @@ namespace ValheimModToDo
                 if (piece.name == "piece_repair") // Repair function is a build piece in Valheim
                     return;
                 Jotunn.Logger.LogInfo($"AddCurrentCraftItemToDoList: {piece.name}, total {total}");
-                todoResources.AddRecipe(piece);
+                todoPanel.todo.AddRecipe(piece);
+                todoPanel.SetVisible(true);
                 UpdateToDoPanel();
             }
         }
@@ -170,7 +175,8 @@ namespace ValheimModToDo
         {
             Jotunn.Logger.LogInfo($"Add Craft To-Do: {recipe.name} amount {recipe.m_amount} quality {quality}");
             for (int i = 0; i < count; i++)
-                todoResources.AddRecipe(recipe, quality);
+                todoPanel.todo.AddRecipe(recipe, quality);
+            todoPanel.SetVisible(true);
             UpdateToDoPanel();
         }
 
@@ -178,14 +184,14 @@ namespace ValheimModToDo
         {
             Jotunn.Logger.LogInfo($"Remove Craft To-Do: {recipe.name} quality {quality}");
             for (int i = 0; i < count; i++)
-                todoResources.RemoveRecipe(recipe, quality);
+                todoPanel.todo.RemoveRecipe(recipe, quality);
             UpdateToDoPanel();
         }
 
         private void RemoveCraftToDo(Piece piece, int quality)
         {
             Jotunn.Logger.LogInfo($"Remove Build To-Do: {piece.name} quality {quality}");
-            todoResources.RemoveRecipe(piece.name, quality);
+            todoPanel.todo.RemoveRecipe(piece.name, quality);
             UpdateToDoPanel();
         }
    }

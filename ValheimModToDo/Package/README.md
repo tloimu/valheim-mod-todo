@@ -17,7 +17,7 @@ Add the building recipe to the list by pressing `<Insert>` key while placing a b
 
 The To-Do List is swiched to *Edit Mode* when player inventory is open. In Edit Mode, you can edit the To-Do List in more detail in the separate panel that appears.
 
-Clear the list from recipies by clicking the **Clear All** button on the To-Do List panel when in Edit Mode.
+Clear the list from recipies by clicking the **Clear All** button on the To-Do List panel when in Edit Mode. Each recipe row also has its own increment (+) and decrement (-) amount button to allow manual editing of the list.
 
 The needed amount of resources is automatically updated when you:
 
@@ -39,3 +39,4 @@ The To-Do List is stored in a file `todo-list-for-{PlayerName}-in-{WorldName}-v1
 Reasons not to use this mod:
 
  - Missing translations on "Add to To-Do"-button, "Clear Crafting To-Do list"-button and "To-Do" panel title
+ - To-Do List does not scale automatically in different display sizes
