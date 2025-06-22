@@ -208,7 +208,7 @@ namespace ValheimModToDo
 
         public bool Visible = false;
 
-        public void ToggleVisibilty()
+        public void ToggleVisibility()
         {
             Visible = !Visible;
             UpdateViewModes();

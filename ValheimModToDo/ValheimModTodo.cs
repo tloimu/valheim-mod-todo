@@ -51,19 +51,19 @@ namespace ValheimModToDo
             _instance = null;
         }
 
-        private ButtonConfig ToggleVisibiltyButton;
+        private ButtonConfig ToggleVisibilityButton;
         private ButtonConfig AddCraftToDoButton;
 
         private void AddInputs()
         {
             // Add key bindings on the fly
-            ToggleVisibiltyButton = new ButtonConfig
+            ToggleVisibilityButton = new ButtonConfig
             {
                 Name = "Open To-Do Panel",
                 Key = KeyCode.Home,
                 ActiveInCustomGUI = true
             };
-            InputManager.Instance.AddButton(PluginGUID, ToggleVisibiltyButton);
+            InputManager.Instance.AddButton(PluginGUID, ToggleVisibilityButton);
 
             AddCraftToDoButton = new ButtonConfig
             {
@@ -78,9 +78,9 @@ namespace ValheimModToDo
         {
             if (ZInput.instance != null)
             {
-                if (ZInput.GetButtonDown(ToggleVisibiltyButton.Name))
+                if (ZInput.GetButtonDown(ToggleVisibilityButton.Name))
                 {
-                    todoPanel.ToggleVisibilty();
+                    todoPanel.ToggleVisibility();
                 }
                 if (ZInput.GetButtonDown(AddCraftToDoButton.Name))
                 {
