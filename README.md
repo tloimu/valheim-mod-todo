@@ -13,7 +13,8 @@ Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/v
 
 Prio:
 
- - When Skills-list open -> Hide To-Do List temporarily
+ - Bugfix: +/- buttons do not work on item upgrades
+ - Exit Notes Edit focus with <Tab>
 
 Next:
 
@@ -49,3 +50,16 @@ Interesting readings:
  - [Craft All Button Mod](https://github.com/fiote/valheim-craftall/tree/master)
  - [Getting Started by RandyKnapp](https://github.com/RandyKnapp/ValheimMods/blob/main/ValheimModding-GettingStarted.md)
  - [UI Tweaks Mod Source](https://thunderstore.io/c/valheim/p/shudnal/MyLittleUI/source/)
+
+
+# Workflow
+
+Open `ValheimModToDo.sln` (Visual Studio).
+
+Testing release build locally:
+
+ - Visual Studio -> Build Release
+ - Console -> `sh publish_release.sh VERSION`
+ - R2ModMan -> **Settings** -> **Profile** tab -> **Import local mod** -> choose file `..\ValheimModToDo\Package\valheim-mod-todo-list.VERSION.zip`
+ - R2ModMan -> **Start modded** button
+

@@ -112,7 +112,7 @@ namespace ValheimModToDo
             {
                 // Create the panel object
                 ToDoEditPanel = GUIManager.Instance.CreateWoodpanel(
-                    parent: GUIManager.CustomGUIFront.transform,
+                    parent: GUIManager.CustomGUIBack.transform,
                     anchorMin: new Vector2(0.5f, 0.5f),
                     anchorMax: new Vector2(0.5f, 0.5f),
                     position: new Vector2(width / 2, 0),
