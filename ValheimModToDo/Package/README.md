@@ -40,3 +40,8 @@ Reasons not to use this mod:
 
  - Missing translations on "Add to To-Do"-button, "Clear Crafting To-Do list"-button and "To-Do" panel title
  - To-Do List does not scale automatically in different display sizes
+
+
+## Feedback and source code
+
+Feedback can be given to [the mod's GitHub project pages at](https://github.com/tloimu/valheim-mod-todo).

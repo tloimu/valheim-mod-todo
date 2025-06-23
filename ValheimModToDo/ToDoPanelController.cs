@@ -19,6 +19,8 @@ namespace ValheimModToDo
         public ToDoListEdit ListEditor = new();
         public ToDoListEdit ListViewer = new();
 
+        public bool ToDoEditPanelParentSet = false;
+
         readonly float width = 282f;
         readonly float buttonWidth = 16f;
         readonly float nameWidth = 190f;
@@ -112,7 +114,7 @@ namespace ValheimModToDo
             {
                 // Create the panel object
                 ToDoEditPanel = GUIManager.Instance.CreateWoodpanel(
-                    parent: GUIManager.CustomGUIBack.transform,
+                    parent: GUIManager.CustomGUIFront.transform,
                     anchorMin: new Vector2(0.5f, 0.5f),
                     anchorMax: new Vector2(0.5f, 0.5f),
                     position: new Vector2(width / 2, 0),
@@ -236,12 +238,47 @@ namespace ValheimModToDo
                 UpdateToDoPanel();
                 ToDoEditPanel.SetActive(InventoryGuiOpen);
                 ToDoViewPanel.SetActive(!InventoryGuiOpen);
+                ReparentEditPanelBehindCraftingUI();
             }
             else
             {
                 ToDoEditPanel.SetActive(false);
                 ToDoViewPanel.SetActive(false);
             }
+        }
+
+        // Move the ToDoEditPanel behind game's Crafting UI to avoid e.g. Skills panel be obscured by it.
+        // This is a bit fragile as certain game UI changes may break this logic.
+        // Putting it too far back, and it does not get inputs. Putting it too much at the front and it blocks
+        // some game's panels. Putting it behind Crafting panel seems to work.
+        public void ReparentEditPanelBehindCraftingUI()
+        {
+            if (ToDoEditPanelParentSet == false)
+            {
+                var put_behind_panel = InventoryGui.instance?.m_crafting;
+                if (put_behind_panel != null && put_behind_panel.parent != null)
+                {
+                    Jotunn.Logger.LogInfo($"ToDoPanelController: Move to behind {put_behind_panel.name} panel");
+                    ToDoEditPanel.transform.SetParent(put_behind_panel.parent, true);
+                    ToDoEditPanel.transform.SetSiblingIndex(put_behind_panel.GetSiblingIndex());
+                    ToDoEditPanelParentSet = true;
+                    // PrintGUIHierarchy(ToDoEditPanel.transform);
+                }
+                else
+                    Jotunn.Logger.LogWarning($"ToDoPanelController: No crafting panel was found - game has changed and todo list may render incorrectly");
+            }
+        }
+
+        public void PrintGUIHierarchy(Transform transform, int level = 0)
+        {
+            Jotunn.Logger.LogInfo($"[{level}] - {transform.name} ({transform.GetSiblingIndex()})");
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                var child = transform.GetChild(i);
+                Jotunn.Logger.LogInfo($"[{level}] - child {child.name} ({child.GetSiblingIndex()})");
+            }
+            if (transform.parent != null)
+                PrintGUIHierarchy(transform.parent, level + 1);
         }
 
         public void UpdateToDoPanel()
