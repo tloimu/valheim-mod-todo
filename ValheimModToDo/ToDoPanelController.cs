@@ -7,6 +7,7 @@ using System.Text;
 using UnityEngine.Events;
 
 using Logger = Jotunn.Logger;
+using System.Collections.Generic;
 
 namespace ValheimModToDo
 {
@@ -31,6 +32,7 @@ namespace ValheimModToDo
         readonly float listHeight = 300f;
 
         public ToDoResources todo = new();
+        public ToDoLocateResources locateResources = new(radius: 30f, searchIntervalSeconds: 5f);
 
         public bool gLogVerbose = false;
 
@@ -79,6 +81,9 @@ namespace ValheimModToDo
 
             CreateViewModePanel();
             CreateEditModePanel();
+
+            Canvas backCanvas = GUIManager.CustomGUIBack.GetComponent<Canvas>();
+            backCanvas.sortingOrder = 500;
 
             SaveFileLoaded = false;
         }
@@ -214,6 +219,7 @@ namespace ValheimModToDo
         {
             Visible = !Visible;
             UpdateViewModes();
+            locateResources.SetVisibility(Visible);
         }
 
         public void SetVisible(bool visible = true)
@@ -222,6 +228,7 @@ namespace ValheimModToDo
             {
                 Visible = visible;
                 UpdateViewModes();
+                locateResources.SetVisibility(Visible);
             }
         }
 
@@ -313,11 +320,24 @@ namespace ValheimModToDo
 
                 if (todo.WasChangedSince())
                     todo.SaveToFile();
+
+                UpdateSearchedResources();
             }
             else
             {
                 Jotunn.Logger.LogWarning("UpdateToDoPanel: No inventory");
             }
+        }
+
+        private void UpdateSearchedResources()
+        {
+            List<string> resources = this
+                .todo
+                .resources
+                .Values
+                .Select(obj => obj.item.name)
+                .ToList();
+            this.locateResources.UpdateSearchedResources(resources);
         }
 
         public void UpdateResources(Inventory inventory)
@@ -368,7 +388,7 @@ namespace ValheimModToDo
                         else
                             line = $"  {name}\t[{res.Value.count}]";
                         if (gLogVerbose)
-                                Jotunn.Logger.LogInfo($"{line} from key [{res.Key}] id [{res.Value.item.id}] name [{res.Value.item.name}]");
+                            Jotunn.Logger.LogInfo($"{line} from key [{res.Key}] id [{res.Value.item.id}] name [{res.Value.item.name}]");
                         resourcesText.AppendLine(line);
                     }
                 }
