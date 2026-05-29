@@ -82,6 +82,9 @@ namespace ValheimModToDo
             CreateViewModePanel();
             CreateEditModePanel();
 
+            Canvas backCanvas = GUIManager.CustomGUIBack.GetComponent<Canvas>();
+            backCanvas.sortingOrder = 500;
+
             SaveFileLoaded = false;
         }
 
