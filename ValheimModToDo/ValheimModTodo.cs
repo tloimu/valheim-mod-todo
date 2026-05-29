@@ -90,6 +90,7 @@ namespace ValheimModToDo
                 if (todoPanel != null)
                 {
                     todoPanel.CheckTextInput();
+                    todoPanel.locateResources.UpdateMarkers();
                 }
             }
         }
@@ -194,5 +195,5 @@ namespace ValheimModToDo
             todoPanel.todo.RemoveRecipe(piece.name, quality);
             UpdateToDoPanel();
         }
-   }
+    }
 }
