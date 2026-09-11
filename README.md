@@ -8,6 +8,7 @@ Shoutout to game Satisfactory for inspirations.
 
 Download the releases from [To-Do List Thunderstore](https://thunderstore.io/c/valheim/p/Iskindur/ToDoList/).
 
+Tested to work with Valheim 1.0 release.
 
 # To-Do
 
